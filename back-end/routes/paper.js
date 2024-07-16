@@ -29,7 +29,7 @@ router.post ("/", async (req, res) => {
     try {
         let newPaper = {
             name: req.body.name,
-            nameLowerCase: req.body.name,
+            nameLowerCase: req.body.nameLowerCase,
             productionStatus: "notStarted", // notStarted, inProduction, done
             releaseDates: req.body.releaseDates
         }

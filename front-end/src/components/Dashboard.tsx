@@ -33,7 +33,7 @@ export default function Dashboard(){
     // Add or update
     async function onSubmit(e:any){
         e.preventDefault()
-        const paper = { name:"Bomlo", releaseDates: 0}
+        const paper = { name:"Bomlo", nameLowerCase: "bomlo", releaseDates: 0}
         try {
             const response = await fetch(URL, {
                 method: "POST",
