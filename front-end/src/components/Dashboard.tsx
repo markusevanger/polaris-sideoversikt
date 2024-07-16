@@ -71,7 +71,7 @@ export default function Dashboard(){
                             {
                             papers.map((paper) => {
                                 return(
-                                    <Link className={cn(buttonVariants({ variant: "outline" }), "w-full mt-1")} to={`/${paper.name.toLowerCase()}`}> {paper.name}</Link>
+                                    <Link className={cn(buttonVariants({ variant: "outline" }), "w-full mt-1")} to={`/${paper.nameLowerCase}`}> {paper.name}</Link>
                                 )
                             })
                         }
