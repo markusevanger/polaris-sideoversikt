@@ -18,7 +18,7 @@ router.get("/:name", async (req, res) => {
     let query = {nameLowerCase: req.params.nameLowerCase}
     let result = await collection.findOne(query)
 
-    if (!result) res.send(`Not Found: ${nameLowerCase}`).status(404)
+    if (!result) res.send("Not Found").status(404)
     else res.send(result).status(200)
 })
 
