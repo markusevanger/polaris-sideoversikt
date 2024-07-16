@@ -15,7 +15,7 @@ router.get("/", async (req, res) => {
 // Get single paper
 router.get("/:name", async (req, res) => {
     let collection = await db.collection("papers")
-    let query = {name: req.params.name}
+    let query = {nameLowerCase: req.params.nameLowerCase}
     let result = await collection.findOne(query)
 
     if (!result) res.send("Not Found").status(404)
@@ -29,6 +29,7 @@ router.post ("/", async (req, res) => {
     try {
         let newPaper = {
             name: req.body.name,
+            nameLowerCase: req.body.name,
             productionStatus: "notStarted", // notStarted, inProduction, done
             releaseDates: req.body.releaseDates
         }
