@@ -13,14 +13,16 @@ router.get("/", async (req, res) => {
 })
 
 // Get single paper
-router.get("/:id", async (req, res) => {
+router.get("/:name", async (req, res) => {
     let collection = await db.collection("papers")
-    let query = {_id: new ObjectId(req.params.id)}
+    let query = {name: req.params.name}
     let result = await collection.findOne(query)
 
     if (!result) res.send("Not Found").status(404)
     else res.send(result).status(200)
 })
+
+
 
 // Add new newspaper 
 router.post ("/", async (req, res) => {
