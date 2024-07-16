@@ -6,14 +6,17 @@ import { ScrollArea, ScrollBar } from "./ui/scroll-area"
 import { cn } from "@/lib/utils"
 
 
-export default function Dashboard(){
+export default function Dashboard() {
+
+
+
 
     const URL = "https://api.markusevanger.no/polaris/papers"
-    
-    const [papers, setPapers] =  useState([])
+
+    const [papers, setPapers] = useState([])
 
     useEffect(() => {
-        async function getPapers(){
+        async function getPapers() {
             const response = await fetch(URL)
             if (!response.ok) {
                 const message = `Error occured: ${response.statusText}`
@@ -31,9 +34,9 @@ export default function Dashboard(){
 
 
     // Add or update
-    async function onSubmit(e:any){
+    async function onSubmit(e: any) {
         e.preventDefault()
-        const paper = { name:"Bømlo Nytt", nameLowerCase: "bomlo-nytt", releaseDates: 0}
+        const paper = { name: "Bømlo Nytt", nameLowerCase: "bomlo-nytt", releaseDates: 0 }
         try {
             const response = await fetch(URL, {
                 method: "POST",
@@ -42,55 +45,53 @@ export default function Dashboard(){
                 },
                 body: JSON.stringify(paper)
             })
-        } catch(err){
+        } catch (err) {
             console.error(err)
         }
     }
 
-    
 
-    return(
+
+    return (
         <>
-        <div className="w-full h-screen">
+            <div className="w-full h-screen">
+                <div className="grid grid-cols-5 w-full">
 
+                    {/* Main Left content */}
+                    <div className=" col-span-4">
+                    </div>
 
-          
-
-            <div className="grid grid-cols-5 w-full">
-                
-
-                {/* Main Left content */ }
-                <div className=" col-span-4">
-                    <Button variant={"default"} className="w-20" onClick={(e) => onSubmit(e)}> + </Button>
-                </div>
-
-                {/* Right content */ }
-                <div className="bg-gray-200 p-2 h-screen">
+                    {/* Right content */}
+                    <div className="bg-gray-200 p-2 h-screen">
                         <h2 className="">Aviser</h2>
-                        <ScrollArea className="rounded-md border p-2 h-full pb-10 ">
+                        <ScrollArea className="rounded-md border p-2 h-full pb-10 flex justify-end">
                             {
-                            papers.map((paper) => {
-                                return(
-                                    <Link className={cn(buttonVariants({ variant: "outline" }), "w-full mt-1")} to={`/${paper.nameLowerCase}`}> {paper.name}</Link>
-                                )
-                            })
-                        }
-                        <p className="text-xs font-mono text-center">Antall aviser: {papers.length}</p>
-                        <ScrollBar/>
+                                papers.map((paper) => {
+                                    return (
+                                        <Link className={cn(buttonVariants({ variant: "outline" }), "w-full mt-1")} to={`/${paper.nameLowerCase}`}> {statusEmoji(paper.productionStatus)} {paper.name}</Link>
+                                    )
+                                })
+                            }
+
+                            <div className="flex w-full flex-col items-center my-3 gap-2">
+                                <Button variant={"default"} className="w-20" onClick={(e) => onSubmit(e)}> + </Button>
+                                <p className="text-xs font-mono text-center">Antall aviser: {papers.length}</p>
+                            </div>
+
+                            <ScrollBar />
                         </ScrollArea>
-  
 
-                    
-                    
+                    </div>
                 </div>
-
             </div>
-        
-        
-        
-        </div>
-    
         </>
-        
+
     )
+}
+
+
+function statusEmoji(productionStatus: string) {
+    if (productionStatus == "notStarted") return "🔴"
+    else if (productionStatus == "inProduction") return "🟠"
+    else if (productionStatus == "done") return "🟢"
 }
