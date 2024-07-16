@@ -13,7 +13,7 @@ router.get("/", async (req, res) => {
 })
 
 // Get single paper
-router.get("/:name", async (req, res) => {
+router.get("/:nameLowerCase", async (req, res) => {
     let collection = await db.collection("papers")
     let query = {nameLowerCase: req.params.nameLowerCase}
     let result = await collection.findOne(query)
