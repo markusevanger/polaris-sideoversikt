@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react"
-import { useParams } from "react-router-dom"
+import { Link, useParams } from "react-router-dom"
 import { Paper } from "./Paper"
-
+import { Button, buttonVariants } from "./ui/button"
+import { cn } from "@/lib/utils"
+import { ChevronLeft } from "lucide-react"
+import { statusEmoji } from "./Dashboard"
 
 
 
@@ -45,11 +48,34 @@ export default function Details() {
     return (
 
         <>
-            <h1>{paper.name}</h1>
-            <p> {paper.productionStatus}</p>
+
+            <div className="h-screen w-full p-5 flex flex-col">
+
+                <div className="flex gap-2">
+                    <Link to={"/"} className={cn(buttonVariants({ variant: "outline" }))}> <ChevronLeft /> Til Dashbord</Link>
+                    <h1 className="text-2xl font-bold">{paper.name}</h1>
+
+                </div>
+
+                <div className="h-full w-full flex justify-center items-center">
+                    <p> {statusEmoji(paper.productionStatus)} {getStatusText(paper.productionStatus)}</p>
+                </div>
+
+
+
+            </div>
 
         </>
 
 
     )
+}
+
+
+function getStatusText(status:string) : string {
+    
+    if (status == "notStarted") return "Ikke begynt"
+    else if (status == "inProduction") return "I produksjon"
+    else if (status == "done") return "Ferdig"
+    else return "Status er ikke definert (noe gikk galt)"
 }

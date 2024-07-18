@@ -24,12 +24,16 @@ router.get("/:nameLowerCase", async (req, res) => {
 
 
 
+function createLinkFriendlyName(name){
+    return name.toLowerCase().replace(" ", "-")
+}
+
 // Add new newspaper 
 router.post ("/", async (req, res) => {
     try {
         let newPaper = {
             name: req.body.name,
-            nameLowerCase: req.body.nameLowerCase,
+            nameLowerCase: createLinkFriendlyName(req.body.name),
             productionStatus: "notStarted", // notStarted, inProduction, done
             releaseDates: req.body.releaseDates
         }
