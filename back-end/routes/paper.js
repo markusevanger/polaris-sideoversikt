@@ -35,7 +35,9 @@ router.post ("/", async (req, res) => {
             name: req.body.name,
             nameLowerCase: createLinkFriendlyName(req.body.name),
             productionStatus: "notStarted", // notStarted, inProduction, done
-            releaseDates: req.body.releaseDates
+            releaseDates: req.body.releaseDates,
+            info:req.body.info,
+            deadline:req.body.deadline
         }
         let collection = await db.collection("papers")
         let result = await collection.insertOne(newPaper)

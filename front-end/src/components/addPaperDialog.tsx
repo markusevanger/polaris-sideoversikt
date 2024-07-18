@@ -16,8 +16,8 @@ import { Checkbox } from "./ui/checkbox"
 import { CirclePlus } from "lucide-react"
 import { URL } from "./Dashboard"
 import { useState } from "react"
-import { error } from "console"
 import { useNavigate } from "react-router-dom"
+import { Textarea } from "./ui/textarea"
 
 
 
@@ -26,36 +26,36 @@ import { useNavigate } from "react-router-dom"
 export default function AddPaperDialog() {
     const navigate = useNavigate()
     const [paperName, setPaperName] = useState("")
-
-    type Weekdays = {
-        [key: string]: boolean;
-      };
-
-    let weekdays:Weekdays = {'Mandag': false, 'Tirsdag': false, 'Onsdag' : false, 'Torsdag' : false, 'Fredag' : false, 'Lørdag' : false, 'Søndag' : false}
+    const [info, setInfo] = useState("")
+    const [deadline, setDeadline] = useState("15:30")
 
 
-    const handleCheckWeekday = (newState:boolean, day:string) => {
+    let weekdays = { 'Mandag': false, 'Tirsdag': false, 'Onsdag': false, 'Torsdag': false, 'Fredag': false, 'Lørdag': false, 'Søndag': false }
+
+    const handleCheckWeekday = (newState: boolean, day: string) => {
         weekdays[day] = newState
     }
 
     const handleSubmit = async () => {
-        const avis = {navn: paperName, releaseDays: weekdays} 
+        const avis = { name: paperName, releaseDays: weekdays, info:info, deadline:deadline  }
         try {
             const response = await fetch(URL, {
-                method:"POST",
+                method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify(avis)
             })
 
-            if (!response.ok){
+            if (!response.ok) {
                 //throw new Error(`HTTP Error! Status ${response.status}`)
             }
 
+            console.log(response.status + ": " + response.statusText)
+
             // give feedback here
         }
-        catch (err){
+        catch (err) {
             //console.log("A problem occcured: " + error)
         } finally {
             navigate("/")
@@ -75,18 +75,18 @@ export default function AddPaperDialog() {
 
                         <div className="flex flex-col gap-1 border rounded-md p-2 bg-slate-200">
                             <Label>Avis navn</Label>
-                            <Input placeholder="Agderposten" value={paperName} onChange={(e) => {setPaperName(e.target.value)}}></Input>
+                            <Input placeholder="Agderposten" value={paperName} onChange={(e) => { setPaperName(e.target.value) }}></Input>
                         </div>
 
-                        <div>
-                            
+                        <div className="grid grid-cols-2 gap-3">
+
                             <div className="flex flex-col gap-1 border rounded-md p-2 bg-slate-200">
-                            <Label>Hvilke dager går avisen ut?</Label>
+                                <Label>Hvilke dager går avisen ut?</Label>
                                 {
                                     Object.keys(weekdays).map((day: string, index: number) => {
                                         return (
                                             <div key={index} className="w-full justify-start p-1">
-                                                <Checkbox  id={index.toString()} onCheckedChange={(value:boolean) => handleCheckWeekday(value, day)} /> {day}
+                                                <Checkbox id={index.toString()} onCheckedChange={(value: boolean) => handleCheckWeekday(value, day)} /> {day}
                                             </div>
                                         )
                                     })
@@ -95,9 +95,24 @@ export default function AddPaperDialog() {
 
                             </div>
 
+                            <div className="grid gap-3 grid-rows-3">
+                                <div className="border rounded-md p-2 bg-slate-200">
+                                    <Label>Hva er deadline?</Label>
+                                    <Input defaultValue="15:30" value={deadline} onChange={(e) => {setDeadline(e.target.value)}}></Input>
+                                </div>
+                                <div className="border rounded-md p-2 row-span-2 bg-slate-200 flex gap-2 flex-col">
+                                    <Label>Beskrivelse og info</Label>
+                                    <div className="h-full">
+                                        <Textarea className=" min-h-full text-sm" value={info} onChange={(e) => {setInfo(e.target.value)}} placeholder="Deadline er 15:00 på fredager ..." />
+
+                                    </div>
+                                </div>
+
+
+
+                            </div>
+
                         </div>
-
-
 
                     </div>
                     <DialogFooter className="p-2">
@@ -107,7 +122,7 @@ export default function AddPaperDialog() {
                                     Lukk
                                 </Button>
                             </DialogClose>
-                            <Button onClick={() => {console.log(Object.keys(weekdays).filter((day:string) => weekdays[day]))}}> Legg til</Button>
+                            <Button onClick={() => handleSubmit()}> Legg til</Button>
                         </div>
                     </DialogFooter>
                 </DialogHeader>
