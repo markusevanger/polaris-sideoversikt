@@ -70,7 +70,7 @@ router.patch("/:id", async (req, res) => {
 router.delete("/:id", async ( req, res) => {
     try {
 
-        const query = { _id : new ObjectId(req.params._id) }
+        const query = { _id : new ObjectId(req.params.id) }
 
         const collection = db.collections("papers")
         let result = await collection.deleteOne(query)
