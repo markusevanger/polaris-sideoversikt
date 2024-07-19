@@ -58,12 +58,12 @@ export default function AddPaperDialog() {
         catch (err) {
             //console.log("A problem occcured: " + error)
         } finally {
-            navigate("/")
+            
         }
     }
 
     return (
-        <Dialog>
+        <Dialog >
             <DialogTrigger className={buttonVariants({ variant: "outline" })}>
                 <CirclePlus className="w-4" />
             </DialogTrigger>

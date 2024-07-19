@@ -6,6 +6,15 @@ import { cn } from "@/lib/utils"
 import { ChevronLeft } from "lucide-react"
 import { statusEmoji } from "./Dashboard"
 
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+
+import { DeleteDialog } from "./DeleteDialog"
 
 
 
@@ -13,12 +22,11 @@ export default function Details() {
 
     const URL = "https://api.markusevanger.no/polaris/papers"
     const params = useParams()
-    const [paper, setPaper] = useState(new Paper(undefined, "loading", "", "", 0))
+    const [paper, setPaper] = useState(new Paper(undefined, "loading", "", "notStarted", 0, "", ""))
 
     useEffect(() => {
         async function getPaper() {
             const name = params.name.toString() || undefined
-            console.log(name)
             const response = await fetch(URL + "/" + name)
             if (!response.ok) {
                 const message = `Error occured: ${response.statusText}`
@@ -33,7 +41,9 @@ export default function Details() {
                     paperData.name,
                     paperData.nameLowerCase,
                     paperData.productionStatus,
-                    paperData.releaseNumber
+                    paperData.releaseNumber,
+                    paperData.info,
+                    paperData.deadline
                 )
             )
 
@@ -51,14 +61,31 @@ export default function Details() {
 
             <div className="h-screen w-full p-5 flex flex-col">
 
-                <div className="flex gap-2">
-                    <Link to={"/"} className={cn(buttonVariants({ variant: "outline" }))}> <ChevronLeft /> Til Dashbord</Link>
-                    <h1 className="text-2xl font-bold">{paper.name}</h1>
+                <div className="flex flex-col gap-2 ">
+                    <div className="flex justify-between">
+                        <Link to={"/"} className={cn(buttonVariants({ variant: "outline" }), "max-w-40")}> <ChevronLeft /> Til Dashbord</Link>
+                        <DeleteDialog paper={paper}></DeleteDialog>
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                        <h1 className="text-2xl font-bold">{paper.name}</h1>
+                        <p className="text-sm text-foreground" >Trykkfrist: {paper.deadline}</p>
+                    </div>
+
 
                 </div>
 
-                <div className="h-full w-full flex justify-center items-center">
-                    <p> {statusEmoji(paper.productionStatus)} {getStatusText(paper.productionStatus)}</p>
+                <div className="h-full w-full flex flex-col gap-1 justify-center items-center">
+                    <Select>
+                        <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder={` ${statusEmoji(paper.productionStatus)} ${getStatusText(paper.productionStatus)} `} />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="notStarted">🔴 Ikke Begynt</SelectItem>
+                            <SelectItem value="inProduction">🟠 I Produksjon</SelectItem>
+                            <SelectItem value="done">🟢 Ferdig</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
 
 
@@ -72,8 +99,8 @@ export default function Details() {
 }
 
 
-function getStatusText(status:string) : string {
-    
+function getStatusText(status: string): string {
+
     if (status == "notStarted") return "Ikke begynt"
     else if (status == "inProduction") return "I produksjon"
     else if (status == "done") return "Ferdig"
