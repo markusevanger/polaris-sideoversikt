@@ -77,7 +77,7 @@ router.delete("/:id", async ( req, res) => {
         res.send(result).status(200)
     } catch (err) {
         console.error(err)
-        res.status(500).send(`Error deleting paper: ${res.statusMessage}`)
+        res.status(500).send(`Error deleting paper: ${err}`)
     }
 })
 
