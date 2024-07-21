@@ -34,7 +34,7 @@ export default function Details() {
 
     useEffect(() => {
         async function getPaper() {
-            const name = params.name.toString() || undefined
+            const name = params.name?.toString() || undefined
             const response = await fetch(URL + "/" + name)
             if (!response.ok) {
                 const message = `Error occured: ${response.statusText}`

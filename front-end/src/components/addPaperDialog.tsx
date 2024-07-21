@@ -16,7 +16,6 @@ import { Checkbox } from "./ui/checkbox"
 import { CirclePlus } from "lucide-react"
 import { URL } from "./Dashboard"
 import { useState } from "react"
-import { useNavigate } from "react-router-dom"
 import { Textarea } from "./ui/textarea"
 
 
@@ -24,13 +23,12 @@ import { Textarea } from "./ui/textarea"
 
 
 export default function AddPaperDialog() {
-    const navigate = useNavigate()
     const [paperName, setPaperName] = useState("")
     const [info, setInfo] = useState("")
     const [deadline, setDeadline] = useState("15:30")
 
 
-    let weekdays = { 'Mandag': false, 'Tirsdag': false, 'Onsdag': false, 'Torsdag': false, 'Fredag': false, 'Lørdag': false, 'Søndag': false }
+    let weekdays: Record<string, boolean> = { Mandag: false, Tirsdag: false, Onsdag: false, Torsdag: false, Fredag: false, Lørdag: false, Søndag: false }
 
     const handleCheckWeekday = (newState: boolean, day: string) => {
         weekdays[day] = newState

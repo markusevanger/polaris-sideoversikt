@@ -1,12 +1,10 @@
-import { release } from "os"
 import { useEffect, useState } from "react"
-import { Button, buttonVariants } from "./ui/button"
+import { buttonVariants } from "./ui/button"
 import { Link } from "react-router-dom"
 import { ScrollArea, ScrollBar } from "./ui/scroll-area"
 import { cn } from "@/lib/utils"
 import AddPaperDialog from "./addPaperDialog"
 import { Paper } from "./Paper"
-import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group"
 
 
 
@@ -36,27 +34,6 @@ export default function Dashboard() {
         console.log(`Antall aviser i repsons: ${papers.length}`)
         return
     }, [papers.length])
-
-
-
-    // Add or update
-    async function onSubmit(e: any) {
-        e.preventDefault()
-        const paper = { name: "Bømlo Nytt", nameLowerCase: "bomlo-nytt", releaseDates: 0 }
-        try {
-            const response = await fetch(URL, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(paper)
-            })
-        } catch (err) {
-            console.error(err)
-        }
-    }
-
-
 
     return (
         <>
