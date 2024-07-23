@@ -49,16 +49,13 @@ router.get("/:date", async (req, res) => {
         console.log(paper.releaseDates)
     })
 
-    result = result.filter((paper) => {paper.releaseDates.includes(dayOfWeek)})
+    result = result.filter((paper) => paper.releaseDates.includes(dayOfWeek));
 
-
-
-    if (!result) {
+    if (!result | result.length === 0) {
         res.status(404).send("Not Found");
     } else {
         res.status(200).json(result); // Use res.json to send the response
     }
-
 })
 
 // Get all data for single paper
