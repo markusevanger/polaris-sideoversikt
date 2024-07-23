@@ -57,6 +57,7 @@ router.get("/:date", async (req, res) => {
             }
             console.log(`Trying to add paper to ${requestedDate}. \n Data: \n  ${JSON.stringify(dateSchema)}`)
             result = await collection.insertOne(dateSchema)
+            res.send(result).send(200)
         } catch (err){
             console.error(err)
             res.status(500).send("Error adding paper")
