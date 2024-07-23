@@ -63,6 +63,42 @@ router.get('/:date', async (req, res) => {
 });
 
 
+// Get a single paper on a specific date
+router.get('/:paperName/:date', async (req, res) => {
+    const { paperName: requestedPaper, date: requestedDate } = req.params;
+
+    try {
+        // Validate the date format
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(requestedDate)) {
+            return res.status(400).send(`Not a valid date ${requestedDate}. Must be of format YYYY-MM-DD`);
+        }
+
+        const collection = db.collection('dates');
+
+        // Find the document for the specified date
+        const date = await collection.findOne({ dateFormatted: requestedDate });
+        
+        if (!date) {
+            return res.status(404).send(`Date ${requestedDate} not found`);
+        }
+
+        // Find the paper within the date document
+        const paper = date.papers.find(paper => {
+            const paperName = Object.keys(paper)[0]; // Assuming the paper name is the key
+            return paperName === requestedPaper;
+        });
+
+        if (!paper) {
+            return res.status(404).send(`Paper ${requestedPaper} not found on ${requestedDate}`);
+        }
+
+        // Send the paper details as response
+        res.status(200).json(paper[requestedPaper]); // Send the paper details
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error retrieving paper');
+    }
+});
 
 
 // Update Paper @ Date
