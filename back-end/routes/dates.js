@@ -76,7 +76,7 @@ router.patch("/:date/:paperName/:newStatus", async (req, res) => {
     if (!isValidDateFormat(requestedDate)) {
         return res.status(400).send(`Not a valid date ${requestedDate}. Must be of format YYYY-MM-DD`);
     }
-    if (!productionStatus) {
+    if (!requestedStatus) {
         return res.status(400).send('Production status is required');
     }
 
