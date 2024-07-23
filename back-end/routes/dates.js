@@ -62,7 +62,11 @@ router.get('/:date', async (req, res) => {
     }
 });
 
-router.patch("/:date/:paperName/:newStatus", async (res, req) => {
+
+
+
+// Update Paper @ Date
+router.patch("/:date/:paperName/:newStatus", async (req, res) => {
     const requestedDate = req.params.date
     const requestedPaper = req.params.paperName
     const requestedStatus = req.params.newStatus
