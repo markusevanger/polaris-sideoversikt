@@ -43,7 +43,10 @@ router.get("/:date", async (req, res) => {
  
 
     let collection = await db.collection("papers")
-    const result = await collection.find({}).toArray(); // Convert the result to an array
+    let result = await collection.find({}).toArray(); // Convert the result to an array
+    result = result.filter((paper) => {paper.releaseDates.includes(dayOfWeek)})
+
+
 
     if (!result || result.length === 0) {
         res.status(404).send("Not Found");
