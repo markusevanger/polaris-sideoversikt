@@ -30,7 +30,7 @@ router.get("/:date", async (req, res) => {
     }
     const date = new Date(requestedDate)
     const dayIndex = date.getDay()
-    const papers =  paperCollection.find({ releaseDates: dayIndex }).toArray()
+    const papers =  paperCollection.find({ releaseDates: dayIndex })
 
     const papersData = papers.map((paper) => ({
         [paper.name] : { 
@@ -39,6 +39,8 @@ router.get("/:date", async (req, res) => {
             date: date
         }
     }))
+
+    console.log(papers)
 
     
     // Date has never been accessed, create new. 
