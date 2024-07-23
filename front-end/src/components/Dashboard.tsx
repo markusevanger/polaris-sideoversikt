@@ -17,7 +17,7 @@ const getDateFormatted = (date: Date) => {
     }
     return;
 }
-const URL = "https://api.markusevanger.no/polaris/dates"
+const URL = "https://api.markusevanger.no/polaris/papers"
 export default function Dashboard() {
 
     const [papers, setPapers] = useState([])
@@ -33,10 +33,7 @@ export default function Dashboard() {
             return
         }
         const papers = await response.json()
-        setPapers(papers.papers)
-        papers.papers.map((paper:any) => {
-            console.log(paper[0].name)
-        })
+        setPapers(papers)
     }
     useEffect(() => {
         getPapers()
