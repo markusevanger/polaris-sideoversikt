@@ -48,7 +48,7 @@ if (!result) {
             dateFormatted: requestedDate,
 
             date: date.getDate(),
-            month: date.getMonth(),
+            month: date.getMonth()+1,
             year: date.getFullYear(),
             dayIndex: dayIndex,
             papers: papersData
@@ -60,8 +60,8 @@ if (!result) {
             res.status(500).send(result)
         } else {
             let query = { dateFormatted: req.params.date }
-            let result = await collection.findOne(query)
-            res.send(result).status(200)
+            let newResult = await collection.findOne(query)
+            res.send(newResult).status(200)
         }
         
 
