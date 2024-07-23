@@ -3,6 +3,7 @@ import express from "express";
 import db from "../db/connection.js";
 import { ObjectId } from "mongodb";
 import Paper from './Paper.js';
+import router from "./paper.js";
 
 
 // Utility function to validate date format (YYYY-MM-DD)
@@ -74,3 +75,5 @@ router.post ("/", async (req, res) => {
         res.status(500).send("Error adding paper")
     }
 })
+
+export default router
