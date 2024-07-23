@@ -34,6 +34,12 @@ router.get("/:date", async (req, res) => {
     console.log(`Trying to find papers releasing on day: ${dayIndex}`)
     const papers = await paperCollection.find({ releaseDates: dayIndex }).toArray()
 
+    const papersData = papers.map((paper) => ({
+        [paper.name] : {
+            nameLowerCase: paper.nameLowerCase,
+            productionStatus: "notStarted"
+        }
+    }))
 
 // Date has never been accessed, create new. 
 if (!result) {
@@ -45,7 +51,7 @@ if (!result) {
             month: date.getMonth(),
             year: date.getFullYear(),
             dayIndex: dayIndex,
-            papers: papers
+            papers: papersData
 
 
         }
