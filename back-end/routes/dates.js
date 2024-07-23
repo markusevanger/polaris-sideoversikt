@@ -39,7 +39,7 @@ router.get("/:date", async (req, res) => {
         };
       });
 
-      console.log("ASD " + papersData)
+      console.log("ASD " + JSON.stringify(papersData))
 
 
 
