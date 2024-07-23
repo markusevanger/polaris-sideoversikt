@@ -40,13 +40,16 @@ router.get("/:date", async (req, res) => {
     const dayOfWeek = (date.getDay() + 6 ) % 7
 
     console.log("Getting newspapers from: " + req.params.date)
-
+ 
 
     let collection = await db.collection("papers")
-    let result = await collection.find({})
+    const result = await collection.find({}).toArray(); // Convert the result to an array
 
-    if (!result) res.send("Not Found").status(404)
-    else res.send(result).status(200) 
+    if (!result || result.length === 0) {
+        res.status(404).send("Not Found");
+    } else {
+        res.status(200).json(result); // Use res.json to send the response
+    }
 
 })
 
