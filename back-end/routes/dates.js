@@ -41,7 +41,7 @@ router.get("/:date", async (req, res) => {
                 year: date.getFullYear(),
                 dayIndex: date.getDay(),
     
-                papers: papers.find({ releaseDates: dayIndex })
+                papers: papers.find({ releaseDates: date.getDay() })
                 
             }
             result = collection.insertOne(dateSchema)
