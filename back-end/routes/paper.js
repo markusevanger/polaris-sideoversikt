@@ -41,13 +41,10 @@ router.get("/:date", async (req, res) => {
 
 
     let collection = await db.collection("papers")
-    let result = await collection.find({releaseDates : dayOfWeek})
+    let result = await collection.find({})
 
     if (!result) res.send("Not Found").status(404)
     else res.send(result).status(200) 
-
-    
-
 
 })
 
