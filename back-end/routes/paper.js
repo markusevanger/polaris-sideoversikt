@@ -46,7 +46,7 @@ router.get("/:date", async (req, res) => {
     let result = await collection.find({}).toArray(); // Convert the result to an array
     
     result.map((paper) => {
-        console.log(paper.name)
+        console.log(paper.releaseDates)
     })
 
     result = result.filter((paper) => {paper.releaseDates.includes(dayOfWeek)})
