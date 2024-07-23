@@ -1,7 +1,6 @@
 
 import express from "express";
 import db from "../db/connection.js";
-import papers from "./paper.js"
 
 const router = express.Router()
 
@@ -22,12 +21,16 @@ router.get("/:date", async (req, res) => {
     }
 
     let collection = await db.collection("dates")
+    const paperCollection = await db.collection("papers")
     let query = {dateFormatted: req.params.date}
     let result = await collection.findOne(query)
-
+ 
     if (result){
         res.send(result).status(200)
     }
+
+    const dayIndex = date.getDay()
+    const papers =  paperCollection.find({ releaseDates: dayIndex })
     
     // Date has never been accessed, create new. 
     if (!result) {
@@ -39,9 +42,9 @@ router.get("/:date", async (req, res) => {
                 date: date.getDate(), 
                 month: date.getMonth(),
                 year: date.getFullYear(),
-                dayIndex: date.getDay(),
+                dayIndex: dayIndex,
     
-                papers: papers.find({ releaseDates: date.getDay() })
+                papers: papers
                 
             }
             result = collection.insertOne(dateSchema)
