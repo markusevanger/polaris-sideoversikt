@@ -35,7 +35,7 @@ router.get("/:date", async (req, res) => {
     const papersData = papers.map((paper) => {
         return { 
           paperName: "AAAH",
-          productionStatus: "notStarted", // notStarted, inProduction, done
+          productionStatus: "aasd", // notStarted, inProduction, done
         };
       });
 
