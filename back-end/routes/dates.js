@@ -1,9 +1,7 @@
 
 import express from "express";
 import db from "../db/connection.js";
-import { ObjectId } from "mongodb";
 import Paper from './Paper.js';
-import router from "./paper.js";
 
 const router = express.Router()
 

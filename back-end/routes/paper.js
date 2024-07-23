@@ -25,10 +25,6 @@ router.get("/:nameLowerCase", async (req, res) => {
 })
 
 
-router.get("/:date")
-
-
-
 function createLinkFriendlyName(name){
     return name.toLowerCase().replace(" ", "-")
 }
