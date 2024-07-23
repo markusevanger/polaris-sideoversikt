@@ -35,7 +35,6 @@ router.post ("/", async (req, res) => {
         let newPaper = {
             name: req.body.name,
             nameLowerCase: createLinkFriendlyName(req.body.name),
-            productionStatus: "notStarted", // notStarted, inProduction, done
             releaseDates: req.body.releaseDates,
             info:req.body.info,
             deadline:req.body.deadline

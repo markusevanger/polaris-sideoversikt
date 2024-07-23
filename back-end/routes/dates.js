@@ -31,6 +31,14 @@ router.get("/:date", async (req, res) => {
     const date = new Date(requestedDate)
     const dayIndex = date.getDay()
     const papers =  paperCollection.find({ releaseDates: dayIndex })
+
+    const papersData = papers.map((paper) => ({
+        [paper.name] : { 
+            paperName: paper.name,
+            productionStatus: "notStarted", // notStarted, inProduction, done
+            date: date
+        }
+    }))
     
     // Date has never been accessed, create new. 
     if (!result) {
@@ -43,7 +51,7 @@ router.get("/:date", async (req, res) => {
                 year: date.getFullYear(),
                 dayIndex: dayIndex,
     
-                papers: papers
+                papers: papersData
                 
             }
             result = collection.insertOne(dateSchema)
