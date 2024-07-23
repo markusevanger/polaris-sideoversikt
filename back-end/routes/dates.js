@@ -29,7 +29,6 @@ router.get('/:date', async (req, res) => {
             return res.status(200).json(result);
         }
 
-        console.log(`Trying to find papers releasing on day: ${dayIndex}`);
         const papers = await paperCollection.find({ releaseDates: dayIndex }).toArray();
         const papersData = papers.map(paper => ({
             [paper.nameLowerCase]: {

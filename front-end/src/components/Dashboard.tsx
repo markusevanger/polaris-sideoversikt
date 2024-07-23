@@ -4,30 +4,39 @@ import { Link } from "react-router-dom"
 import { ScrollArea, ScrollBar } from "./ui/scroll-area"
 import { cn } from "@/lib/utils"
 import AddPaperDialog from "./addPaperDialog"
-import { Paper } from "./Paper"
 import { DatePicker } from "./DatePicker"
 import { statusEmoji } from "./formattingFunctions"
 
 
-
-export const URL = "https://api.markusevanger.no/polaris/papers"
-
+const getDateFormatted = (date: Date) => {
+    if (date) {
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+    return;
+}
+const URL = "https://api.markusevanger.no/polaris/dates"
 export default function Dashboard() {
 
     const [papers, setPapers] = useState([])
     const [date, setDate] = useState<Date | undefined>(new Date())
 
+
+
     async function getPapers() {
-        const response = await fetch(URL)
+        const response = await fetch(`${URL}/${getDateFormatted(date!!)}`)
         if (!response.ok) {
             const message = `Error occured: ${response.statusText}`
             console.error(message)
             return
         }
         const papers = await response.json()
-        setPapers(papers)
-        console.log(`Antall aviser i repsons: ${papers.length}`)
-
+        setPapers(papers.papers)
+        papers.papers.map((paper:any) => {
+            console.log(paper[0].name)
+        })
     }
     useEffect(() => {
         getPapers()
@@ -55,9 +64,9 @@ export default function Dashboard() {
                         <ScrollArea className="rounded-md border p-2 h-full pb-10 flex justify-end">
                             <h2 className="text-sm">Aviser  </h2>
                             {
-                                papers.map((paper: Paper, index: number) => {
+                                papers.map((paper:any, index: number) => {
                                     return (
-                                        <Link key={index} className={cn(buttonVariants({ variant: "outline" }), "w-full mt-1")} to={`/${paper.nameLowerCase}`}> {statusEmoji(paper.productionStatus)} {paper.name}</Link>
+                                        <Link key={index} className={cn(buttonVariants({ variant: "outline" }), "w-full mt-1")} to={`/${paper.nameLowerCase}/${getDateFormatted(date!!)}`}> {statusEmoji(paper.productionStatus)} {paper.name}</Link>
                                     )
                                 })
                             }

@@ -14,7 +14,6 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "./ui/checkbox"
 import { CirclePlus } from "lucide-react"
-import { URL } from "./Dashboard"
 import { useState } from "react"
 import { Textarea } from "./ui/textarea"
 import { getDayFromIndex } from "./formattingFunctions"
@@ -41,7 +40,7 @@ export default function AddPaperDialog() {
         }
 
     }
-
+    const URL = "https://api.markusevanger.no/polaris/papers"
     const handleSubmit = async () => {
         const avis = { name: paperName, releaseDates: weekdays, info:info, deadline:deadline  }
         try {

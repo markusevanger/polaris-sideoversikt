@@ -20,11 +20,11 @@ const router = createBrowserRouter([
   },
 
   {
-    path:"/:name",
+    path:"/:name/:date",
     element: <App/>,
     children: [
       {
-        path:"/:name",
+        path:"/:name/:date",
         element: <Details/>
       }
     ]
