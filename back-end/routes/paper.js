@@ -7,6 +7,25 @@ import { ObjectId } from "mongodb";
 
 const router = express.Router()
 
+
+/* 
+
+Data should look like this:
+    {
+        name: Agderposten,
+        releases: [
+            2024-07-23 : {
+                productionStatus: inProduction
+            },
+            2024-07-24 : {
+                productionStatus: notStarted
+            }
+        
+        ]
+    },
+
+
+*/
 // Get all papers
 router.get("/", async (req, res) => {
     let collection = await db.collection("papers")
@@ -14,10 +33,28 @@ router.get("/", async (req, res) => {
     res.send(results).status(200);
 })
 
-// Get single paper
+
+router.get("/:date", async (req, res) => {
+
+    const date = new Date(req.params.date)
+    const dayOfWeek = (date.getDay() + 6 ) % 7
+
+
+    let collection = await db.collection("papers")
+    let result = await collection.find({releaseDates : dayOfWeek})
+
+    if (!result) res.send("Not Found").status(404)
+    else res.send(result).status(200) 
+
+    
+
+
+})
+
+// Get all data for single paper
 router.get("/:nameLowerCase", async (req, res) => {
     let collection = await db.collection("papers")
-    let query = {nameLowerCase: req.params.nameLowerCase}
+    let query = { nameLowerCase: req.params.nameLowerCase }
     let result = await collection.findOne(query)
 
     if (!result) res.send("Not Found").status(404)
@@ -25,19 +62,27 @@ router.get("/:nameLowerCase", async (req, res) => {
 })
 
 
-function createLinkFriendlyName(name){
+function createLinkFriendlyName(name) {
     return name.toLowerCase().replace(" ", "-")
 }
 
+
+
+
+
+
+
+
+
 // Add new newspaper 
-router.post ("/", async (req, res) => {
+router.post("/", async (req, res) => {
     try {
         let newPaper = {
             name: req.body.name,
             nameLowerCase: createLinkFriendlyName(req.body.name),
             releaseDates: req.body.releaseDates,
-            info:req.body.info,
-            deadline:req.body.deadline
+            info: req.body.info,
+            deadline: req.body.deadline
         }
         let collection = await db.collection("papers")
         let result = await collection.insertOne(newPaper)
@@ -48,11 +93,27 @@ router.post ("/", async (req, res) => {
     }
 })
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Update Paper by Id
 router.patch("/:id", async (req, res) => {
     try {
-        const query = { _id: new ObjectId(req.params.id)}
+        const query = { _id: new ObjectId(req.params.id) }
         const updates = {
-            $set : {
+            $set: {
                 name: req.body.name,
                 productionStatus: req.body.productionStatus,
                 releaseDates: req.body.releaseDates
@@ -61,16 +122,20 @@ router.patch("/:id", async (req, res) => {
         let collection = await db.collection("papers")
         let result = await collection.updateOne(query, updates)
         res.send(result).status(200)
-    } catch (err){
+    } catch (err) {
         console.error(err)
         res.status(500).send("Error updating paper")
     }
 })
 
-router.delete("/:id", async ( req, res) => {
+
+
+
+// Delete Paper by Id
+router.delete("/:id", async (req, res) => {
     try {
 
-        const query = { _id : new ObjectId(req.params.id) }
+        const query = { _id: new ObjectId(req.params.id) }
 
         const collection = await db.collection("papers")
         let result = await collection.deleteOne(query)

@@ -9,7 +9,6 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 app.use("/papers", papers)
-app.use("/dates", dates)
 
 // Starting server:
 app.listen(PORT, () => {
