@@ -21,7 +21,7 @@ router.get("/:date", async (req, res) => {
     }
 
     let collection = await db.collection("dates")
-    const paperCollection = await db.collection("papers")
+    let paperCollection = await db.collection("papers")
     let query = {dateFormatted: req.params.date}
     let result = await collection.findOne(query)
  
@@ -39,6 +39,7 @@ router.get("/:date", async (req, res) => {
             date: date
         }
     }))
+
     
     // Date has never been accessed, create new. 
     if (!result) {
@@ -53,7 +54,9 @@ router.get("/:date", async (req, res) => {
     
                 papers: papersData
                 
+                
             }
+            console.log(`Trying to add paper to ${requestedDate}. \n Data: \n  ${JSON.stringify(dateSchema)}`)
             result = collection.insertOne(dateSchema)
         } catch (err){
             console.error(err)
