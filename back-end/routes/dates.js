@@ -36,11 +36,10 @@ router.get("/:date", async (req, res) => {
         [paper.name] : { 
             paperName: paper.name,
             productionStatus: "notStarted", // notStarted, inProduction, done
-            date: date
+            
         }
     }))
 
-    console.log(papers)
 
     
     // Date has never been accessed, create new. 
@@ -53,8 +52,6 @@ router.get("/:date", async (req, res) => {
                 month: date.getMonth(),
                 year: date.getFullYear(),
                 dayIndex: dayIndex,
-    
-                papers: papersData
                 
                 
             }
