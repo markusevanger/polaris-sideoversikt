@@ -5,6 +5,7 @@ import { ObjectId } from "mongodb";
 import Paper from './Paper.js';
 import router from "./paper.js";
 
+const router = express.Router()
 
 // Utility function to validate date format (YYYY-MM-DD)
 const isValidDateFormat = (dateString) => {
@@ -51,28 +52,6 @@ router.get("/:date", async (req, res) => {
             res.status(500).send("Error adding paper")
         }
 
-    }
-})
-
-
-
-// Add new newspaper 
-router.post ("/", async (req, res) => {
-    try {
-        let newPaper = {
-            name: req.body.name,
-            nameLowerCase: createLinkFriendlyName(req.body.name),
-            productionStatus: "notStarted", // notStarted, inProduction, done
-            releaseDates: req.body.releaseDates,
-            info:req.body.info,
-            deadline:req.body.deadline
-        }
-        let collection = await db.collection("papers")
-        let result = await collection.insertOne(newPaper)
-        res.send(result).status(204)
-    } catch (err) {
-        console.error(err)
-        res.status(500).send("Error adding paper")
     }
 })
 
