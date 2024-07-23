@@ -30,6 +30,8 @@ router.get("/:date", async (req, res) => {
     }
     const date = new Date(requestedDate)
     const dayIndex = date.getDay()
+
+    console.log(`Trying to find papers releasing on day: ${dayIndex}`)
     const papers = await paperCollection.find({ releaseDates: dayIndex }).toArray()
 
 
@@ -49,6 +51,8 @@ if (!result) {
         }
         // console.log(`Trying to add paper to ${requestedDate}. \n Data: \n  ${JSON.stringify(dateSchema)}`)
         result = await collection.insertOne(dateSchema)
+        res.send(result).status(200)
+
     } catch (err) {
         console.error(err)
         res.status(500).send("Error adding paper")
