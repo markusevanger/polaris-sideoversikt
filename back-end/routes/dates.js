@@ -28,14 +28,13 @@ router.get("/:date", async (req, res) => {
     if (result){
         res.send(result).status(200)
     }
-
+    const date = new Date(requestedDate)
     const dayIndex = date.getDay()
     const papers =  paperCollection.find({ releaseDates: dayIndex })
     
     // Date has never been accessed, create new. 
     if (!result) {
         try {
-            const date = new Date(requestedDate)
             let dateSchema = {
                 dateFormatted: requestedDate,
                 
