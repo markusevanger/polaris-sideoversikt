@@ -39,6 +39,8 @@ router.get("/:date", async (req, res) => {
         };
       });
 
+      console.log("ASD " + papersData)
+
 
 
 // Date has never been accessed, create new. 
@@ -55,7 +57,7 @@ if (!result) {
 
 
         }
-        console.log(`Trying to add paper to ${requestedDate}. \n Data: \n  ${JSON.stringify(dateSchema)}`)
+        // console.log(`Trying to add paper to ${requestedDate}. \n Data: \n  ${JSON.stringify(dateSchema)}`)
         result = await collection.insertOne(dateSchema)
     } catch (err) {
         console.error(err)
