@@ -39,6 +39,8 @@ router.get("/:date", async (req, res) => {
     const date = new Date(req.params.date)
     const dayOfWeek = (date.getDay() + 6 ) % 7
 
+    console.log("Getting newspapers from: " + req.params.date)
+
 
     let collection = await db.collection("papers")
     let result = await collection.find({})
