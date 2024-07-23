@@ -17,6 +17,7 @@ import { CirclePlus } from "lucide-react"
 import { URL } from "./Dashboard"
 import { useState } from "react"
 import { Textarea } from "./ui/textarea"
+import { getDayFromIndex } from "./formattingFunctions"
 
 
 
@@ -26,16 +27,23 @@ export default function AddPaperDialog() {
     const [paperName, setPaperName] = useState("")
     const [info, setInfo] = useState("")
     const [deadline, setDeadline] = useState("15:30")
+    const [isOpen, setOpen] = useState(false)
 
+    let weekdays: number[] = [];
 
-    let weekdays: Record<string, boolean> = { Mandag: false, Tirsdag: false, Onsdag: false, Torsdag: false, Fredag: false, Lørdag: false, Søndag: false }
+    const handleCheckWeekday = (checked:boolean, day:number) => {
+        if (checked){
+            if (!weekdays.includes(day)){
+                weekdays.push(day)
+            }
+        } else {
+            weekdays = weekdays.filter((values) => values != day)
+        }
 
-    const handleCheckWeekday = (newState: boolean, day: string) => {
-        weekdays[day] = newState
     }
 
     const handleSubmit = async () => {
-        const avis = { name: paperName, releaseDays: weekdays, info:info, deadline:deadline  }
+        const avis = { name: paperName, releaseDates: weekdays, info:info, deadline:deadline  }
         try {
             const response = await fetch(URL, {
                 method: "POST",
@@ -50,6 +58,7 @@ export default function AddPaperDialog() {
             }
 
             console.log(response.status + ": " + response.statusText)
+            setOpen(false)
 
             // give feedback here
         }
@@ -61,7 +70,7 @@ export default function AddPaperDialog() {
     }
 
     return (
-        <Dialog >
+        <Dialog open={isOpen} onOpenChange={(open ) => {setOpen(open)}}>
             <DialogTrigger className={buttonVariants({ variant: "outline" })}>
                 <CirclePlus className="w-4" />
             </DialogTrigger>
@@ -81,10 +90,11 @@ export default function AddPaperDialog() {
                             <div className="flex flex-col gap-1 border rounded-md p-2 bg-slate-200">
                                 <Label>Hvilke dager går avisen ut?</Label>
                                 {
-                                    Object.keys(weekdays).map((day: string, index: number) => {
+                                    
+                                    Array.from({ length: 7 }, (_, index) => index).map((_, index: number) => {
                                         return (
                                             <div key={index} className="w-full justify-start p-1">
-                                                <Checkbox id={index.toString()} onCheckedChange={(value: boolean) => handleCheckWeekday(value, day)} /> {day}
+                                                <Checkbox id={index.toString()} onCheckedChange={(value: boolean) => handleCheckWeekday(value, index)} /> {getDayFromIndex(index)}
                                             </div>
                                         )
                                     })

@@ -5,6 +5,8 @@ import { ScrollArea, ScrollBar } from "./ui/scroll-area"
 import { cn } from "@/lib/utils"
 import AddPaperDialog from "./addPaperDialog"
 import { Paper } from "./Paper"
+import { DatePicker } from "./DatePicker"
+import { statusEmoji } from "./formattingFunctions"
 
 
 
@@ -12,27 +14,23 @@ export const URL = "https://api.markusevanger.no/polaris/papers"
 
 export default function Dashboard() {
 
-
-
-
-    
-
     const [papers, setPapers] = useState([])
+    const [date, setDate] = useState<Date | undefined>(new Date())
 
-    useEffect(() => {
-        async function getPapers() {
-            const response = await fetch(URL)
-            if (!response.ok) {
-                const message = `Error occured: ${response.statusText}`
-                console.error(message)
-                return
-            }
-            const papers = await response.json()
-            setPapers(papers)
+    async function getPapers() {
+        const response = await fetch(URL)
+        if (!response.ok) {
+            const message = `Error occured: ${response.statusText}`
+            console.error(message)
+            return
         }
-        getPapers()
+        const papers = await response.json()
+        setPapers(papers)
         console.log(`Antall aviser i repsons: ${papers.length}`)
-        return
+
+    }
+    useEffect(() => {
+        getPapers()
     }, [papers.length])
 
     return (
@@ -42,13 +40,20 @@ export default function Dashboard() {
 
                     {/* Main Left content */}
                     <div className=" col-span-4">
+
+                        <div>
+                        </div>
+
                     </div>
 
                     {/* Right content */}
                     <div className="bg-gray-200 p-2 h-screen">
 
+                        <DatePicker date={date} setNewDate={((newDate: Date | undefined) => setDate(newDate))}></DatePicker>
+
+
                         <ScrollArea className="rounded-md border p-2 h-full pb-10 flex justify-end">
-                            <h2 className="">Aviser</h2>
+                            <h2 className="text-sm">Aviser  </h2>
                             {
                                 papers.map((paper: Paper, index: number) => {
                                     return (
@@ -73,11 +78,4 @@ export default function Dashboard() {
         </>
 
     )
-}
-
-
-export function statusEmoji(productionStatus: string) {
-    if (productionStatus == "notStarted") return "🔴"
-    else if (productionStatus == "inProduction") return "🟠"
-    else if (productionStatus == "done") return "🟢"
 }

@@ -4,7 +4,7 @@ import { Paper } from "./Paper"
 import { buttonVariants } from "./ui/button"
 import { cn } from "@/lib/utils"
 import { ChevronLeft } from "lucide-react"
-import { statusEmoji } from "./Dashboard"
+import { statusEmoji } from "./formattingFunctions"
 
 import {
     Card,
@@ -122,7 +122,7 @@ export default function Details() {
 
                     <Card className="max-w-40">
                         <CardHeader>
-                            <CardTitle> Info </CardTitle>
+                            <CardTitle className="text-sm text-muted-foreground "> Info </CardTitle>
                         </CardHeader>
                         <CardContent>
                             <p>{paper.info}</p>

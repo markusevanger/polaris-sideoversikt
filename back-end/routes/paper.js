@@ -3,6 +3,8 @@ import db from "../db/connection.js";
 import { ObjectId } from "mongodb";
 
 
+
+
 const router = express.Router()
 
 // Get all papers
@@ -21,6 +23,9 @@ router.get("/:nameLowerCase", async (req, res) => {
     if (!result) res.send("Not Found").status(404)
     else res.send(result).status(200)
 })
+
+
+router.get("/:date")
 
 
 
