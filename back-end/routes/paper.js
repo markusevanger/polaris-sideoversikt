@@ -34,6 +34,7 @@ router.get("/", async (req, res) => {
 })
 
 
+// Get all papers releasing on single date. 
 router.get("/:date", async (req, res) => {
     try {
         const date = new Date(req.params.date);
@@ -75,83 +76,84 @@ router.get("/:date", async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).send("Internal Server Error");
+    }
+});
+
+// Get all data for single paper
+router.get("/:nameLowerCase", async (req, res) => {
+    let collection = await db.collection("papers")
+    let query = { nameLowerCase: req.params.nameLowerCase }
+    let result = await collection.findOne(query)
+
+    if (!result) res.send("Not Found").status(404)
+    else res.send(result).status(200)
+})
 
 
-        // Get all data for single paper
-        router.get("/:nameLowerCase", async (req, res) => {
-            let collection = await db.collection("papers")
-            let query = { nameLowerCase: req.params.nameLowerCase }
-            let result = await collection.findOne(query)
-
-            if (!result) res.send("Not Found").status(404)
-            else res.send(result).status(200)
-        })
+function createLinkFriendlyName(name) {
+    return name.toLowerCase().replace(" ", "-")
+}
 
 
-        function createLinkFriendlyName(name) {
-            return name.toLowerCase().replace(" ", "-")
+
+// Add new newspaper 
+router.post("/", async (req, res) => {
+    try {
+        let newPaper = {
+            name: req.body.name,
+            nameLowerCase: createLinkFriendlyName(req.body.name),
+            pattern: req.body.pattern,
+            info: req.body.info,
+            deadline: req.body.deadline,
+
+            releases: []
         }
+        let collection = await db.collection("papers")
+        let result = await collection.insertOne(newPaper)
+        res.send(result).status(204)
+    } catch (err) {
+        console.error(err)
+        res.status(500).send("Error adding paper")
+    }
+})
 
 
-
-        // Add new newspaper 
-        router.post("/", async (req, res) => {
-            try {
-                let newPaper = {
-                    name: req.body.name,
-                    nameLowerCase: createLinkFriendlyName(req.body.name),
-                    pattern: req.body.pattern,
-                    info: req.body.info,
-                    deadline: req.body.deadline,
-
-                    releases: []
-                }
-                let collection = await db.collection("papers")
-                let result = await collection.insertOne(newPaper)
-                res.send(result).status(204)
-            } catch (err) {
-                console.error(err)
-                res.status(500).send("Error adding paper")
+// Update Paper by Id
+router.patch("/:id", async (req, res) => {
+    try {
+        const query = { _id: new ObjectId(req.params.id) }
+        const updates = {
+            $set: {
+                name: req.body.name,
+                productionStatus: req.body.productionStatus,
+                pattern: req.body.pattern
             }
-        })
-
-
-        // Update Paper by Id
-        router.patch("/:id", async (req, res) => {
-            try {
-                const query = { _id: new ObjectId(req.params.id) }
-                const updates = {
-                    $set: {
-                        name: req.body.name,
-                        productionStatus: req.body.productionStatus,
-                        pattern: req.body.pattern
-                    }
-                }
-                let collection = await db.collection("papers")
-                let result = await collection.updateOne(query, updates)
-                res.send(result).status(200)
-            } catch (err) {
-                console.error(err)
-                res.status(500).send("Error updating paper")
-            }
-        })
+        }
+        let collection = await db.collection("papers")
+        let result = await collection.updateOne(query, updates)
+        res.send(result).status(200)
+    } catch (err) {
+        console.error(err)
+        res.status(500).send("Error updating paper")
+    }
+})
 
 
 
 
-        // Delete Paper by Id
-        router.delete("/:id", async (req, res) => {
-            try {
+// Delete Paper by Id
+router.delete("/:id", async (req, res) => {
+    try {
 
-                const query = { _id: new ObjectId(req.params.id) }
+        const query = { _id: new ObjectId(req.params.id) }
 
-                const collection = await db.collection("papers")
-                let result = await collection.deleteOne(query)
-                res.send(result).status(200)
-            } catch (err) {
-                console.error(err)
-                res.status(500).send(`Error deleting paper: ${err}`)
-            }
-        })
+        const collection = await db.collection("papers")
+        let result = await collection.deleteOne(query)
+        res.send(result).status(200)
+    } catch (err) {
+        console.error(err)
+        res.status(500).send(`Error deleting paper: ${err}`)
+    }
+})
 
-        export default router;
+export default router;
