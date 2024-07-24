@@ -43,7 +43,7 @@ router.get("/:date", async (req, res) => {
 
         console.log("Getting newspapers from: " + req.params.date + " " + dayOfWeek);
 
-        const collection = client.db("your_database_name").collection("papers"); // Replace with your database name
+        const collection = db.collection("papers"); // Replace with your database name
         let result = await collection.find({}).toArray(); // Convert the result to an array
 
         // Remove any papers that aren't supposed to release on this day.
