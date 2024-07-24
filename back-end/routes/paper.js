@@ -46,17 +46,13 @@ router.get("/:date", async (req, res) => {
     let collection = await db.collection("papers")
     let result = await collection.find({}).toArray(); // Convert the result to an array
 
-    result.map((paper) => {
-        console.log(paper.releaseDates)
-    })
-
     // Remove any papers that arent supposed to release on this day. 
-    result = result.filter((paper) => paper.releaseDates.includes(dayOfWeek));
+    result = result.filter((paper) => paper.pattern.includes(dayOfWeek));
 
     // Make sure date exists in all papers supposed to release on this day.
     result = result.map((paper) => {
-        if (!(date in paper.releaseDates)) {
-            paper.releaseDates[date] = { productionStatus: "notStarted" };
+        if (!(date in paper.releases)) {
+            paper.releases[date] = { productionStatus: "notStarted" };
         }
         return paper;
     });
@@ -87,21 +83,17 @@ function createLinkFriendlyName(name) {
 
 
 
-
-
-
-
-
-
 // Add new newspaper 
 router.post("/", async (req, res) => {
     try {
         let newPaper = {
             name: req.body.name,
             nameLowerCase: createLinkFriendlyName(req.body.name),
-            releaseDates: req.body.releaseDates,
+            pattern: req.body.pattern,
             info: req.body.info,
-            deadline: req.body.deadline
+            deadline: req.body.deadline,
+            
+            releases : []
         }
         let collection = await db.collection("papers")
         let result = await collection.insertOne(newPaper)
