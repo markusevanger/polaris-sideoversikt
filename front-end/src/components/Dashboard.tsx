@@ -33,6 +33,7 @@ export default function Dashboard() {
             return
         }
         const papers = await response.json()
+        console.log(papers)
         setPapers(papers)
     }
     useEffect(() => {

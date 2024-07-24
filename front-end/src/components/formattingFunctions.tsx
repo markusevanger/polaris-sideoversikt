@@ -2,6 +2,7 @@ export function statusEmoji(productionStatus: string) {
     if (productionStatus == "notStarted") return "🔴"
     else if (productionStatus == "inProduction") return "🟠"
     else if (productionStatus == "done") return "🟢"
+    else return ""
 }
 
 

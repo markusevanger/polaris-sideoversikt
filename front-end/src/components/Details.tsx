@@ -29,19 +29,21 @@ export default function Details() {
 
     const URL = "https://api.markusevanger.no/polaris/"
     const params = useParams()
+
+    const name = params.name?.toString() || undefined
+    const date = params.date?.toString() || undefined
+
     const [paper, setPaper] = useState({
         _id: "",
         name: "",
         nameLowerCase: "",
         info: "",
         deadline: "",
-
-        releases: {},
-        date: ""
+        productionStatus : ""
 
     })
 
-    const [date, setDate] = useState(new Date())
+    const [dateObj, setDateObj] = useState(new Date(date!!))
 
     const updatePaperState = (newState: any) => {
         setPaper((prevState: any) => ({
@@ -53,6 +55,10 @@ export default function Details() {
     useEffect(() => {
 
         async function getGeneralPaperInfo() {
+
+            if (!name || !date) return;
+
+
             const response = await fetch(`${URL}papers/${name}/${date}`)
             if (!response.ok) {
                 const message = `Error occured: ${response.statusText}`
@@ -68,17 +74,10 @@ export default function Details() {
                 nameLowerCase: paperData.nameLowerCase,
                 info: paperData.info,
                 deadline: paperData.deadline,
-                releases: paperData.releases,
-                date: date
+                productionStatus: paperData.releases[date].productionStatus
             })
 
         }
-
-        const name = params.name?.toString() || undefined
-        const date = params.date?.toString() || undefined
-
-        setDate(new Date(date!!))
-
         getGeneralPaperInfo()
         console.log(`Hentet avis: ${paper.name}`)
         return
@@ -86,7 +85,7 @@ export default function Details() {
 
     const updateProductionStatus = async (newStatus: "notStarted" | "inProduction" | "done") => {
         try {
-            const response = await fetch(`${URL}${paper.date}/${paper.nameLowerCase}/${newStatus}`, {
+            const response = await fetch(`${URL}papers/${paper.nameLowerCase}/${date}/${newStatus}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json'
@@ -122,7 +121,7 @@ export default function Details() {
                     <div className="flex flex-col gap-2">
                         <h1 className="text-2xl font-bold">{paper.name}</h1>
                         <div className="flex gap-1">
-                            <Badge>{date.getDate()}. {getMonthFromIndex(date.getMonth())} {date.getFullYear()}</Badge>
+                            <Badge>{dateObj.getDate()}. {getMonthFromIndex(dateObj.getMonth())} {dateObj.getFullYear()}</Badge>
                             <p className="text- text-foreground" >Trykkfrist: {paper.deadline}</p>
                         </div>
 
@@ -139,7 +138,7 @@ export default function Details() {
                             <div className="flex h-full justify-center items-center">
                                 <Select onValueChange={(value: "notStarted" | "inProduction" | "done") => { updateProductionStatus(value) }}>
                                     <SelectTrigger className="w-[180px]">
-                                        <SelectValue placeholder={` ${statusEmoji("notStarted")} ${getStatusText("notStarted")} `} />
+                                        <SelectValue placeholder={` ${statusEmoji(paper.productionStatus)} ${getStatusText(paper.productionStatus)} `} />
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="notStarted">🔴 Ikke Begynt</SelectItem>
@@ -176,5 +175,5 @@ function getStatusText(status: string): string {
     if (status == "notStarted") return "Ikke begynt"
     else if (status == "inProduction") return "I produksjon"
     else if (status == "done") return "Ferdig"
-    else return "Status er ikke definert (noe gikk galt)"
+    else return status
 }

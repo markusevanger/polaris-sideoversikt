@@ -26,6 +26,15 @@ Data should look like this:
 
 
 */
+
+
+
+
+
+
+
+
+
 // Get all papers
 router.get("/", async (req, res) => {
     let collection = await db.collection("papers")
@@ -34,7 +43,12 @@ router.get("/", async (req, res) => {
 })
 
 
-// Get all papers releasing on single date. 
+
+
+
+
+
+// Get all papers releasing on single date
 router.get("/:date", async (req, res) => {
     try {
         const dateString = req.params.date;
@@ -46,34 +60,50 @@ router.get("/:date", async (req, res) => {
         const collection = db.collection("papers");
 
         // Query papers that include the specific day in their pattern
-        let result = await collection.find({ pattern: dayOfWeek }).toArray();
+        let papers = await collection.find({ pattern: dayOfWeek }).toArray();
 
-        // Update each paper if the date is not in releases
-        await Promise.all(result.map(async (paper) => {
+        if (papers.length === 0) {
+            return res.status(404).send("No papers found for the specified date.");
+        }
+
+        // Update each paper to only keep the releases for the specified date
+        await Promise.all(papers.map(async (paper) => {
+            // Ensure releases is an object
             if (!paper.releases || typeof paper.releases !== 'object' || Array.isArray(paper.releases)) {
                 paper.releases = {};
             }
 
-            if (!(dateString in paper.releases)) {
-                paper.releases[dateString] = { productionStatus: "notStarted" };
-
-                await collection.updateOne(
-                    { _id: paper._id }, // Use _id to ensure correct document is updated
-                    { $set: { [`releases.${dateString}`]: { productionStatus: "notStarted" } } }
-                );
+            // Keep only the specified date in the releases object
+            const updatedReleases = {};
+            if (paper.releases[dateString]) {
+                updatedReleases[dateString] = paper.releases[dateString];
+            } else {
+                updatedReleases[dateString] = { productionStatus: "notStarted" };
             }
+
+            // Update the paper in the database
+            await collection.updateOne(
+                { _id: paper._id }, // Use _id to ensure correct document is updated
+                { $set: { releases: updatedReleases } }
+            );
         }));
 
-        if (!result) {
-            res.status(404).send("Not Found");
-        } else {
-            res.status(200).json(result);
-        }
+        // Return the papers with updated releases
+        papers = await collection.find({ pattern: dayOfWeek }).toArray(); // Refetch to include updated releases
+        res.status(200).json(papers);
+
     } catch (err) {
         console.error(err);
         res.status(500).send("Internal Server Error");
     }
 });
+
+
+
+
+
+
+
 
 
 router.get("/:paperName/:date", async (req, res) => {
@@ -126,6 +156,12 @@ router.get("/:paperName/:date", async (req, res) => {
 });
 
 
+
+
+
+
+
+
 // Get all data for single paper
 router.get("/:nameLowerCase", async (req, res) => {
     let collection = await db.collection("papers")
@@ -140,6 +176,15 @@ router.get("/:nameLowerCase", async (req, res) => {
 function createLinkFriendlyName(name) {
     return name.toLowerCase().replace(" ", "-")
 }
+
+
+
+
+
+
+
+
+
 
 
 
@@ -163,6 +208,13 @@ router.post("/", async (req, res) => {
 })
 
 
+
+
+
+
+
+
+
 // Update Paper by Id
 router.patch("/:id", async (req, res) => {
     try {
@@ -181,6 +233,15 @@ router.patch("/:id", async (req, res) => {
         res.status(500).send("Error updating paper")
     }
 })
+
+
+
+
+
+
+
+
+
 
 
 // Define the allowed status values
@@ -238,6 +299,16 @@ router.patch("/:paperName/:date/:status", async (req, res) => {
         res.status(500).send("Internal Server Error");
     }
 });
+
+
+
+
+
+
+
+
+
+
 
 
 
