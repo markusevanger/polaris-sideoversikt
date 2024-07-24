@@ -1,7 +1,6 @@
 import express from "express"
 import cors from "cors"
 import papers from "./routes/paper.js"
-import dates from "./routes/dates.js"
 
 const PORT = process.env.PORT || 5050
 const app = express()
