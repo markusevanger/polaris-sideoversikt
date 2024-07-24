@@ -42,30 +42,42 @@ export default function Dashboard() {
     return (
         <>
             <div className="w-full h-screen">
-                <div className="grid grid-cols-5 w-full">
+                <div className="grid grid-cols-4 w-full">
 
                     {/* Main Left content */}
-                    <div className=" col-span-4">
+                    <div className=" col-span-3">
 
-                        <div>
+                        <div className="p-1">
+
+                            <DatePicker date={date} setNewDate={((newDate: Date | undefined) => setDate(newDate))}></DatePicker>
+
                         </div>
 
                     </div>
 
                     {/* Right content */}
-                    <div className="bg-gray-200 p-2 h-screen">
+                    <div className="bg-gray-200 p-2 h-screen col-span-*">
 
-                        <DatePicker date={date} setNewDate={((newDate: Date | undefined) => setDate(newDate))}></DatePicker>
 
 
                         <ScrollArea className="rounded-md border p-2 h-full pb-10 flex justify-end">
-                            <h2 className="text-sm">Aviser  </h2>
                             {
-                                papers.map((paper:any, index: number) => {
-                                    return (
-                                        <Link key={index} className={cn(buttonVariants({ variant: "outline" }), "w-full mt-1")} to={`/${paper.nameLowerCase}/${getDateFormatted(date!!)}`}> {statusEmoji(paper.productionStatus)} {paper.name}</Link>
-                                    )
-                                })
+
+                                papers.length === 0 ?
+
+                                    <p className="text-sm">Inge aviser hentet. </p>
+
+                                    :
+
+
+                                    papers.map((paper: any, index: number) => {
+                                        return (
+                                            <Link key={index} className={cn(buttonVariants({ variant: "outline" }), "w-full mt-1")} to={`/${paper.nameLowerCase}/${getDateFormatted(date!!)}`}> {statusEmoji(paper.productionStatus)} {paper.name}</Link>
+                                        )
+                                    })
+
+
+
                             }
 
                             <div className="flex w-full flex-col items-center my-3 gap-2">

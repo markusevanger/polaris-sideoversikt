@@ -75,6 +75,46 @@ router.get("/:date", async (req, res) => {
     }
 });
 
+
+router.get("/:paperName/:date", async (req, res) => {
+    try {
+        const { paperName, dateString } = req.params;
+        const date = new Date(dateString);
+
+        // Check for valid date format
+        if (isNaN(date.getTime())) {
+            return res.status(400).send("Invalid date format " + dateString + " expected /YYYY-MM-DD");
+        }
+
+        const collection = db.collection("papers");
+
+        // Find the paper by name
+        const paper = await collection.findOne({ nameLowerCase: paperName });
+
+        if (!paper) {
+            return res.status(404).send("Paper not found");
+        }
+
+        // Filter the releases to only include the entry for the specified date
+        const releases = paper.releases || {};
+        const filteredReleases = {};
+
+        if (releases[dateString]) {
+            filteredReleases[dateString] = releases[dateString];
+        }
+
+        // Return the paper info with the filtered releases
+        res.status(200).json({
+            ...paper,
+            releases: filteredReleases
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
 // Get all data for single paper
 router.get("/:nameLowerCase", async (req, res) => {
     let collection = await db.collection("papers")

@@ -35,7 +35,6 @@ export default function Details() {
         nameLowerCase: "",
         info: "",
         deadline: "",
-        releaseDates: [],
 
         productionStatus: "",
         date: ""
