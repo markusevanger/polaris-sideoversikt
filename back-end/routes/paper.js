@@ -64,7 +64,7 @@ router.get("/:date", async (req, res) => {
             }
         }));
 
-        if (!result || result.length === 0) {
+        if (!result) {
             res.status(404).send("Not Found");
         } else {
             res.status(200).json(result);

@@ -38,6 +38,7 @@ export default function AddPaperDialog() {
         } else {
             weekdays = weekdays.filter((values) => values != day)
         }
+        console.log(weekdays)
 
     }
     const URL = "https://api.markusevanger.no/polaris/papers"
@@ -105,7 +106,7 @@ export default function AddPaperDialog() {
                             <div className="grid gap-3 grid-rows-3">
                                 <div className="border rounded-md p-2 bg-slate-200">
                                     <Label>Hva er deadline?</Label>
-                                    <Input defaultValue="15:30" value={deadline} onChange={(e) => {setDeadline(e.target.value)}}></Input>
+                                    <Input value={deadline} onChange={(e) => {setDeadline(e.target.value)}}></Input>
                                 </div>
                                 <div className="border rounded-md p-2 row-span-2 bg-slate-200 flex gap-2 flex-col">
                                     <Label>Beskrivelse og info</Label>
