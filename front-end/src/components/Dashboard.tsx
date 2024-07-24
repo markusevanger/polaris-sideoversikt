@@ -36,6 +36,12 @@ export default function Dashboard() {
     async function getPapers() {
         const response = await fetch(`${URL}/${getDateFormatted(date!!)}`)
         if (!response.ok) {
+
+            if (response.status){
+                console.log("No papers found")
+            }
+
+            
             const message = `Error occured: ${response.statusText}`
             console.error(message)
             return
