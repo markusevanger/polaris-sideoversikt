@@ -43,6 +43,7 @@ export default function Dashboard() {
         if (!response.ok) {
             if (response.status) {
                 console.log("No papers found")
+                setPapers([])
                 return
             }
             const message = `Error occured: ${response.statusText}`
@@ -50,7 +51,6 @@ export default function Dashboard() {
             return
         }
         const papers: Paper[] = await response.json()
-        console.log(papers)
         setPapers(papers)
     }
 
@@ -62,9 +62,19 @@ export default function Dashboard() {
         <div className="w-full h-screen grid grid-rows-12 grid-cols-12 p-5 gap-3">
 
             <DatePicker className={"col-span-4 overflow-hidden"} date={date} setNewDate={(newDate: Date) => setDate(newDate)} />
-            <div className="bg-red-200 col-span-5"></div>
+            <div className=" col-span-5"></div>
+
+            {
+                /*
 
             <RadialChart date={date} dateStr={dateStr} paperData={papers}></RadialChart>
+            <RadialChart date={date} dateStr={dateStr} paperData={papers}></RadialChart>
+            <RadialChart date={date} dateStr={dateStr} paperData={papers}></RadialChart>
+
+                */
+            }
+
+
 
 
             <Card className="row-span-full col-end-13 col-span-3 ">
@@ -78,11 +88,16 @@ export default function Dashboard() {
                         {
                             papers.length === 0 ?
                                 <p className="text-xs text-mono">Ingen aviser hentet</p> :
-                                papers.map((paper: Paper, index: number) => (
-                                    <Link key={index} className={cn(buttonVariants({ variant: "outline" }), "w-full mt-1 justify-start")} to={`/${paper.nameLowerCase}/${getDateFormatted(date)}`}>
-                                        {statusEmoji(paper.releases[getDateFormatted(date)].productionStatus)} {paper.name}
-                                    </Link>
-                                ))
+                                papers.map((paper: Paper, index: number) => {
+                                    const release = paper.releases[getDateFormatted(date)];
+
+                                    return (
+                                        <Link key={index} className={cn(buttonVariants({ variant: "outline" }), "w-full mt-1 justify-start")} to={`/${paper.nameLowerCase}/${getDateFormatted(date)}`}>
+                                            {release ? statusEmoji(release.productionStatus) : '❓'} {paper.name}
+                                        </Link>
+                                    )
+
+                                })
                         }
                         <div className="flex w-full flex-col items-center my-3 gap-2">
                             <p className="text-xs font-mono text-center">Antall aviser: {papers.length}</p>

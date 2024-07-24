@@ -52,7 +52,6 @@ export function RadialChart(props: { paperData: Paper[], dateStr: string, date: 
 
     const amountOfPapersDone = () => {
         const amountDone = paperData.filter((paper: Paper) => paper.releases[dateStr].productionStatus === "done")
-        console.log(paperData)
         return amountDone.length
     }
 
@@ -62,7 +61,7 @@ export function RadialChart(props: { paperData: Paper[], dateStr: string, date: 
     }
 
     return (
-        <Card className="row-start-2 col-span-3 row-span-4">
+        <Card className="row-start-2 col-span-3 row-span-5">
             <CardHeader className="pb-0">
                 <CardTitle>Oversikt</CardTitle>
                 <CardDescription>{date.getDate()}. {getMonthFromIndex(date.getMonth())} {date.getFullYear()}</CardDescription>

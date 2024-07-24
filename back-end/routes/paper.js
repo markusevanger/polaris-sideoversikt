@@ -48,7 +48,6 @@ router.get("/", async (req, res) => {
 
 
 
-// Get all papers releasing on single date
 router.get("/:date", async (req, res) => {
     try {
         const dateString = req.params.date;
@@ -63,29 +62,28 @@ router.get("/:date", async (req, res) => {
         let papers = await collection.find({ pattern: dayOfWeek }).toArray();
 
         if (papers.length === 0) {
-            return res.status(404).send("No papers found for the specified date.");
+            res.status(404).send("No papers found for the specified date.");
+            return;
         }
 
-        // Update each paper to only keep the releases for the specified date
+        // Update each paper to ensure the date entry in releases
         await Promise.all(papers.map(async (paper) => {
             // Ensure releases is an object
             if (!paper.releases || typeof paper.releases !== 'object' || Array.isArray(paper.releases)) {
                 paper.releases = {};
             }
 
-            // Keep only the specified date in the releases object
-            const updatedReleases = {};
-            if (paper.releases[dateString]) {
-                updatedReleases[dateString] = paper.releases[dateString];
-            } else {
-                updatedReleases[dateString] = { productionStatus: "notStarted" };
-            }
+            // Check if the requested date exists in releases
+            if (!paper.releases[dateString]) {
+                // Add the requested date with default status if it doesn't exist
+                paper.releases[dateString] = { productionStatus: "notStarted" };
 
-            // Update the paper in the database
-            await collection.updateOne(
-                { _id: paper._id }, // Use _id to ensure correct document is updated
-                { $set: { releases: updatedReleases } }
-            );
+                // Update the paper in the database
+                await collection.updateOne(
+                    { _id: paper._id }, // Use _id to ensure the correct document is updated
+                    { $set: { releases: paper.releases } }
+                );
+            }
         }));
 
         // Return the papers with updated releases
@@ -97,7 +95,6 @@ router.get("/:date", async (req, res) => {
         res.status(500).send("Internal Server Error");
     }
 });
-
 
 
 
