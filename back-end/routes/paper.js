@@ -39,10 +39,11 @@ router.get("/:date", async (req, res) => {
     try {
         const date = new Date(req.params.date);
         const dayOfWeek = (date.getDay() + 6) % 7;
+        const dateString = req.params.date; // Use the date string from the request parameters
 
         console.log("Getting newspapers from: " + req.params.date + " " + dayOfWeek);
 
-        const collection = db.collection("papers");
+        const collection = client.db("your_database_name").collection("papers"); // Replace with your database name
         let result = await collection.find({}).toArray(); // Convert the result to an array
 
         // Remove any papers that aren't supposed to release on this day.
@@ -50,13 +51,12 @@ router.get("/:date", async (req, res) => {
 
         // Iterate over each paper and update the database
         await Promise.all(result.map(async (paper) => {
-            // Ensure the releases property exists
-            if (!paper.releases) {
+            // Ensure the releases property exists and is an object
+            if (!paper.releases || typeof paper.releases !== 'object' || Array.isArray(paper.releases)) {
                 paper.releases = {};
             }
 
             // Check if the date exists in releases
-            const dateString = req.params.date; // Use the date string from the request parameters
             if (!(dateString in paper.releases)) {
                 paper.releases[dateString] = { productionStatus: "notStarted" };
 
