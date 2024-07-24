@@ -113,7 +113,7 @@ router.patch("/:id", async (req, res) => {
             $set: {
                 name: req.body.name,
                 productionStatus: req.body.productionStatus,
-                releaseDates: req.body.releaseDates
+                pattern: req.body.pattern
             }
         }
         let collection = await db.collection("papers")
