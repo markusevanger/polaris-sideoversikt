@@ -105,8 +105,6 @@ router.post("/", async (req, res) => {
             pattern: req.body.pattern,
             info: req.body.info,
             deadline: req.body.deadline,
-
-            releases: []
         }
         let collection = await db.collection("papers")
         let result = await collection.insertOne(newPaper)
