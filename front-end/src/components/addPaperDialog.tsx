@@ -17,12 +17,13 @@ import { CirclePlus } from "lucide-react"
 import { useState } from "react"
 import { Textarea } from "./ui/textarea"
 import { getDayFromIndex } from "./formattingFunctions"
+import { Paper } from "./Paper"
 
 
 
 
 
-export default function AddPaperDialog() {
+export default function AddPaperDialog(props : {getPapers:any}) {
     const [paperName, setPaperName] = useState("")
     const [info, setInfo] = useState("")
     const [deadline, setDeadline] = useState("15:30")
@@ -54,6 +55,7 @@ export default function AddPaperDialog() {
             }
 
             console.log(response.status + ": " + response.statusText)
+            props.getPapers()
             setOpen(false)
 
             // give feedback here

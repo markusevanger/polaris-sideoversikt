@@ -57,7 +57,7 @@ export default function Dashboard() {
             <DatePicker className={"col-span-4 overflow-hidden"} date={date} setNewDate={(newDate: Date) => setDate(newDate)} />
             <div className=" col-span-5"></div>
 
-            <Card className="row-start-2 col-span-3 row-span-5">
+            <Card className="row-start-2 col-start-1 col-end-10 row-span-5">
                 <CardHeader className="pb-0">
                     <CardTitle>Oversikt</CardTitle>
                     <CardDescription>{date.getDate()}. {getMonthFromIndex(date.getMonth())} {date.getFullYear()}</CardDescription>
@@ -102,7 +102,7 @@ export default function Dashboard() {
                         }
                         <div className="flex w-full flex-col items-center my-3 gap-2">
                             <p className="text-xs font-mono text-center">Antall aviser: {papers.length}</p>
-                            <AddPaperDialog />
+                            <AddPaperDialog getPapers={getPapers} />
                         </div>
                         <ScrollBar />
                     </ScrollArea>
