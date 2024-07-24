@@ -6,6 +6,10 @@ import { cn } from "@/lib/utils"
 import AddPaperDialog from "./addPaperDialog"
 import { DatePicker } from "./DatePicker"
 import { statusEmoji } from "./formattingFunctions"
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
+import { Newspaper } from "lucide-react"
+import { RadialChart } from "./RadialChart"
+import { Paper } from "./Paper"
 
 
 const getDateFormatted = (date: Date | undefined) => {
@@ -15,98 +19,80 @@ const getDateFormatted = (date: Date | undefined) => {
         const day = date.getDate().toString().padStart(2, '0');
         return `${year}-${month}-${day}`;
     }
-    return;
+    return '';
 }
+
 const URL = "https://api.markusevanger.no/polaris/papers"
+
 export default function Dashboard() {
-    
     const params = useParams()
-    const dateStr = params.date?.toString() || undefined
+    let dateStr = params.date?.toString() || undefined
 
     let selectedDate = new Date()
-    if (dateStr){
+    if (dateStr) {
         selectedDate = new Date(dateStr)
+    } else {
+        dateStr = getDateFormatted(selectedDate)
     }
 
-    const [papers, setPapers] = useState([])
+    const [papers, setPapers] = useState<Paper[]>([])
     const [date, setDate] = useState<Date>(selectedDate)
 
-
-
     async function getPapers() {
-        const response = await fetch(`${URL}/${getDateFormatted(date!!)}`)
+        const response = await fetch(`${URL}/${getDateFormatted(date)}`)
         if (!response.ok) {
-
-            if (response.status){
+            if (response.status) {
                 console.log("No papers found")
+                return
             }
-
-            
             const message = `Error occured: ${response.statusText}`
             console.error(message)
             return
         }
-        const papers = await response.json()
+        const papers: Paper[] = await response.json()
         console.log(papers)
         setPapers(papers)
     }
+
     useEffect(() => {
         getPapers()
     }, [date])
 
     return (
-        <>
-            <div className="w-full h-screen">
-                <div className="grid grid-cols-4 w-full">
+        <div className="w-full h-screen grid grid-rows-12 grid-cols-12 p-5 gap-3">
 
-                    {/* Main Left content */}
-                    <div className=" col-span-3">
+            <DatePicker className={"col-span-4 overflow-hidden"} date={date} setNewDate={(newDate: Date) => setDate(newDate)} />
+            <div className="bg-red-200 col-span-5"></div>
 
-                        <div className="p-1">
+            <RadialChart date={date} dateStr={dateStr} paperData={papers}></RadialChart>
 
-                            <DatePicker date={date} setNewDate={((newDate: Date) => setDate(newDate))}></DatePicker>
 
+            <Card className="row-span-full col-end-13 col-span-3 ">
+                <CardHeader>
+                    <CardTitle className="flex gap-2">
+                        <Newspaper></Newspaper> Aviser
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <ScrollArea className="">
+                        {
+                            papers.length === 0 ?
+                                <p className="text-xs text-mono">Ingen aviser hentet</p> :
+                                papers.map((paper: Paper, index: number) => (
+                                    <Link key={index} className={cn(buttonVariants({ variant: "outline" }), "w-full mt-1 justify-start")} to={`/${paper.nameLowerCase}/${getDateFormatted(date)}`}>
+                                        {statusEmoji(paper.releases[getDateFormatted(date)].productionStatus)} {paper.name}
+                                    </Link>
+                                ))
+                        }
+                        <div className="flex w-full flex-col items-center my-3 gap-2">
+                            <p className="text-xs font-mono text-center">Antall aviser: {papers.length}</p>
+                            <AddPaperDialog />
                         </div>
+                        <ScrollBar />
+                    </ScrollArea>
+                </CardContent>
+            </Card>
 
-                    </div>
-
-                    {/* Right content */}
-                    <div className="bg-gray-200 p-2 h-screen col-span-*">
-
-
-
-                        <ScrollArea className="rounded-md border p-2 h-full pb-10 flex justify-end">
-                            {
-
-                                papers.length === 0 ?
-
-                                    <p className="text-sm">Ingen aviser hentet. </p>
-
-                                    :
-
-
-                                    papers.map((paper: any, index: number) => {
-                                        return (
-                                            <Link key={index} className={cn(buttonVariants({ variant: "outline" }), "w-full mt-1")} to={`/${paper.nameLowerCase}/${getDateFormatted(date!!)}`}> { statusEmoji(paper.releases[getDateFormatted(date)])} {paper.name}</Link>
-                                        )
-                                    })
-
-
-
-                            }
-
-                            <div className="flex w-full flex-col items-center my-3 gap-2">
-                                <p className="text-xs font-mono text-center">Antall aviser: {papers.length}</p>
-                                <AddPaperDialog />
-                            </div>
-
-                            <ScrollBar />
-                        </ScrollArea>
-
-                    </div>
-                </div>
-            </div>
-        </>
-
+        </div >
     )
 }

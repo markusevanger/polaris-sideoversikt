@@ -8,7 +8,6 @@ import { getMonthFromIndex, iconStyle, statusEmoji } from "./formattingFunctions
 import {
     Card,
     CardContent,
-    CardDescription,
     CardTitle,
 } from "@/components/ui/card"
 
@@ -20,7 +19,6 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 
-import { DeleteDialog } from "./DeleteDialog"
 import { Badge } from "./ui/badge"
 
 
@@ -43,7 +41,8 @@ export default function Details() {
 
     })
 
-    const [dateObj, setDateObj] = useState(new Date(date!!))
+    const dateObj = new Date(date!!)
+
 
     const updatePaperState = (newState: any) => {
         setPaper((prevState: any) => ({

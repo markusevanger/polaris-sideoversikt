@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/popover"
 import { getDayFromIndex } from "./formattingFunctions"
 
-export function DatePicker(props: {date:Date, setNewDate:(newDate: Date) => void}) {
+export function DatePicker(props: {date:Date, setNewDate:(newDate: Date) => void, className:string}) {
     
     const date = props.date 
     const setNewDate = props.setNewDate
@@ -24,12 +24,12 @@ export function DatePicker(props: {date:Date, setNewDate:(newDate: Date) => void
                 <Button
                     variant={"outline"}
                     className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !date && "text-muted-foreground"
+                        "w-full h-full text-center font-normal",
+                        !date && "text-muted-foreground", props.className
                     )}
                 >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {date ?  `${getDayFromIndex(date.getDay())} ${date.getDate()}.${date.getMonth()}.${date.getFullYear()}` : <span>Velg en dato</span>}
+                    {date ?  `${getDayFromIndex((date.getDay() + 6) % 7)} ${date.getDate()}.${date.getMonth()}.${date.getFullYear()}` : <span>Velg en dato</span>}
                 </Button>
             </PopoverTrigger>
             <PopoverContent className=" w-auto p-2">

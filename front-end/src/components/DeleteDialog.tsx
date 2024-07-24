@@ -1,10 +1,14 @@
 
+
+
+/*
 import { Dialog, DialogTitle, DialogContent, DialogDescription, DialogHeader, DialogTrigger } from "./ui/dialog"
 import { Button } from "./ui/button"
 import { Trash2 } from "lucide-react"
 import { Paper } from "./Paper"
-import { URL } from "./Dashboard"
 import { useNavigate } from "react-router-dom"
+
+
 
 
 export function DeleteDialog(props: { paper: Paper }) {
@@ -48,3 +52,6 @@ export function DeleteDialog(props: { paper: Paper }) {
         </Dialog>
     )
 }
+
+
+*/
