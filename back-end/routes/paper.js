@@ -34,24 +34,36 @@ router.get("/", async (req, res) => {
 })
 
 
+// Get all papers releasing on single date. 
 router.get("/:date", async (req, res) => {
 
     const date = new Date(req.params.date)
-    const dayOfWeek = (date.getDay() + 6 ) % 7
+    const dayOfWeek = (date.getDay() + 6) % 7
 
-    console.log("Getting newspapers from: " + req.params.date  + " " + dayOfWeek)
- 
+    console.log("Getting newspapers from: " + req.params.date + " " + dayOfWeek)
+
 
     let collection = await db.collection("papers")
-    let result = await collection.find({releaseDates : date}).toArray(); // Convert the result to an array
-    
+    let result = await collection.find({}).toArray(); // Convert the result to an array
+
     result.map((paper) => {
         console.log(paper.releaseDates)
     })
 
+    // Remove any papers that arent supposed to release on this day. 
     result = result.filter((paper) => paper.releaseDates.includes(dayOfWeek));
 
-    if (!result | result.length === 0 ) {
+    // Make sure date exists in all papers supposed to release on this day.
+    result = result.map((paper) => {
+        if (!(date in paper.releases)) {
+            paper.releases[date] = { productionStatus: "notStarted" };
+        }
+        return paper;
+    });
+
+
+
+    if (!result | result.length === 0) {
         res.status(404).send("Not Found");
     } else {
         res.status(200).json(result); // Use res.json to send the response
