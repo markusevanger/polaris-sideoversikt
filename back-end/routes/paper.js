@@ -98,10 +98,12 @@ router.get("/:paperName/:date", async (req, res) => {
 
         // Filter the releases to only include the entry for the specified date
         const releases = paper.releases || {};
-        const filteredReleases = { ...releases };
+        const filteredReleases = {};
 
-        // Check if the date exists in releases; if not, add it
-        if (!filteredReleases[dateString]) {
+        if (releases[dateString]) {
+            filteredReleases[dateString] = releases[dateString];
+        } else {
+            // Add the date with "notStarted" status if it doesn't exist
             filteredReleases[dateString] = { productionStatus: "notStarted" };
 
             // Update the paper in the database
