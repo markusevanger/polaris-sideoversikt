@@ -42,7 +42,7 @@ export default function AddPaperDialog() {
     }
     const URL = "https://api.markusevanger.no/polaris/papers"
     const handleSubmit = async () => {
-        const avis = { name: paperName, releaseDates: weekdays, info:info, deadline:deadline  }
+        const avis = { name: paperName, pattern: weekdays, info:info, deadline:deadline  }
         try {
             const response = await fetch(URL, {
                 method: "POST",
