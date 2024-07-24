@@ -5,22 +5,14 @@ import { ScrollArea, ScrollBar } from "./ui/scroll-area"
 import { cn } from "@/lib/utils"
 import AddPaperDialog from "./addPaperDialog"
 import { DatePicker } from "./DatePicker"
-import { statusEmoji } from "./formattingFunctions"
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
+import { getDateFormatted, getMonthFromIndex, statusEmoji } from "./formattingFunctions"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
 import { Newspaper } from "lucide-react"
 import { RadialChart } from "./RadialChart"
 import { Paper } from "./Paper"
+import { Skeleton } from "./ui/skeleton"
 
 
-const getDateFormatted = (date: Date | undefined) => {
-    if (date) {
-        const year = date.getFullYear();
-        const month = (date.getMonth() + 1).toString().padStart(2, '0');
-        const day = date.getDate().toString().padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    }
-    return '';
-}
 
 const URL = "https://api.markusevanger.no/polaris/papers"
 
@@ -55,6 +47,7 @@ export default function Dashboard() {
     }
 
     useEffect(() => {
+        setPapers([])
         getPapers()
     }, [date])
 
@@ -64,9 +57,20 @@ export default function Dashboard() {
             <DatePicker className={"col-span-4 overflow-hidden"} date={date} setNewDate={(newDate: Date) => setDate(newDate)} />
             <div className=" col-span-5"></div>
 
+            <Card className="row-start-2 col-span-3 row-span-5">
+                <CardHeader className="pb-0">
+                    <CardTitle>Oversikt</CardTitle>
+                    <CardDescription>{date.getDate()}. {getMonthFromIndex(date.getMonth())} {date.getFullYear()}</CardDescription>
+                </CardHeader>
+                <CardContent className="flex-1 pb-0">
+                    {papers.length > 0 ? (
+                        <RadialChart date={date} dateStr={dateStr} paperData={papers} />
+                    ) : (
+                        <Skeleton className="w-full h-full rounded-lg p-5" />
+                    )}
+                </CardContent>
 
-            <RadialChart date={date} dateStr={dateStr} paperData={papers}></RadialChart>
-
+            </Card>
 
 
 

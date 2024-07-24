@@ -39,3 +39,14 @@ export function getMonthFromIndex(month: number): string {
     };
     return months[month] || "Not a month";
 }
+
+
+export const getDateFormatted = (date: Date | undefined) => {
+    if (date) {
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+    return '';
+}

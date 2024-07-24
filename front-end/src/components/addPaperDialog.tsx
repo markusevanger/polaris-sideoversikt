@@ -28,22 +28,18 @@ export default function AddPaperDialog() {
     const [deadline, setDeadline] = useState("15:30")
     const [isOpen, setOpen] = useState(false)
 
-    let weekdays: number[] = [];
+    const [weekdays, setWeekdays] = useState<number[]>([]);
 
-    const handleCheckWeekday = (checked:boolean, day:number) => {
-        if (checked){
-            if (!weekdays.includes(day)){
-                weekdays.push(day)
-            }
-        } else {
-            weekdays = weekdays.filter((values) => values != day)
-        }
-        console.log(weekdays)
+    const handleCheckWeekday = (checked: boolean, day: number) => {
+        setWeekdays((prevWeekdays) =>
+            checked ? [...prevWeekdays, day] : prevWeekdays.filter((value) => value !== day)
+        );
+    };
 
-    }
+
     const URL = "https://api.markusevanger.no/polaris/papers"
     const handleSubmit = async () => {
-        const avis = { name: paperName, pattern: weekdays, info:info, deadline:deadline  }
+        const avis = { name: paperName, pattern: weekdays, info: info, deadline: deadline }
         try {
             const response = await fetch(URL, {
                 method: "POST",
@@ -65,12 +61,12 @@ export default function AddPaperDialog() {
         catch (err) {
             //console.log("A problem occcured: " + error)
         } finally {
-            
+
         }
     }
 
     return (
-        <Dialog open={isOpen} onOpenChange={(open ) => {setOpen(open)}}>
+        <Dialog open={isOpen} onOpenChange={(open) => { setOpen(open) }}>
             <DialogTrigger className={buttonVariants({ variant: "outline" })}>
                 <CirclePlus className="w-4" />
             </DialogTrigger>
@@ -90,7 +86,7 @@ export default function AddPaperDialog() {
                             <div className="flex flex-col gap-1 border rounded-md p-2 bg-slate-200">
                                 <Label>Hvilke dager går avisen ut?</Label>
                                 {
-                                    
+
                                     Array.from({ length: 7 }, (_, index) => index).map((_, index: number) => {
                                         return (
                                             <div key={index} className="w-full justify-start p-1">
@@ -106,12 +102,12 @@ export default function AddPaperDialog() {
                             <div className="grid gap-3 grid-rows-3">
                                 <div className="border rounded-md p-2 bg-slate-200">
                                     <Label>Hva er deadline?</Label>
-                                    <Input value={deadline} onChange={(e) => {setDeadline(e.target.value)}}></Input>
+                                    <Input value={deadline} onChange={(e) => { setDeadline(e.target.value) }}></Input>
                                 </div>
                                 <div className="border rounded-md p-2 row-span-2 bg-slate-200 flex gap-2 flex-col">
                                     <Label>Beskrivelse og info</Label>
                                     <div className="h-full">
-                                        <Textarea className=" min-h-full text-sm" value={info} onChange={(e) => {setInfo(e.target.value)}} placeholder="Deadline er 15:00 på fredager ..." />
+                                        <Textarea className=" min-h-full text-sm" value={info} onChange={(e) => { setInfo(e.target.value) }} placeholder="Deadline er 15:00 på fredager ..." />
 
                                     </div>
                                 </div>

@@ -170,24 +170,29 @@ router.get("/:nameLowerCase", async (req, res) => {
 })
 
 
+
+
+
+
+
+
+
+
+
+
+
 function createLinkFriendlyName(name) {
-    return name.toLowerCase().replace(" ", "-")
+    return name.toLowerCase().replace(/\s+/g, '-');
 }
-
-
-
-
-
-
-
-
-
-
-
 
 // Add new newspaper 
 router.post("/", async (req, res) => {
     try {
+
+        if (!req.body.name || !req.body.pattern || !req.body.info || !req.body.deadline) {
+            return res.status(400).send("Missing required fields");
+        }
+
         let newPaper = {
             name: req.body.name,
             nameLowerCase: createLinkFriendlyName(req.body.name),
@@ -197,7 +202,10 @@ router.post("/", async (req, res) => {
         }
         let collection = await db.collection("papers")
         let result = await collection.insertOne(newPaper)
-        res.send(result).status(204)
+        res.status(201).send(result)
+
+
+        
     } catch (err) {
         console.error(err)
         res.status(500).send("Error adding paper")

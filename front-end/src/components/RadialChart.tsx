@@ -9,18 +9,10 @@ import {
     RadialBar,
     RadialBarChart,
 } from "recharts"
-
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card"
 import { ChartConfig, ChartContainer } from "@/components/ui/chart"
 import { Paper } from "./Paper"
-import { getMonthFromIndex } from "./formattingFunctions"
 import { Skeleton } from "./ui/skeleton"
+
 
 
 
@@ -52,82 +44,80 @@ export function RadialChart(props: { paperData: Paper[], dateStr: string, date: 
     const date = props.date
 
     const amountOfPapersDone = () => {
-        const amountDone = paperData.filter((paper: Paper) => paper.releases[dateStr].productionStatus === "done")
-        return amountDone.length
+        const amountDone = paperData.filter((paper: Paper) => {
+            // Check if paper.releases and paper.releases[dateStr] are defined before accessing productionStatus
+            const release = paper.releases[dateStr];
+            return release && release.productionStatus === "done";
+        });
+        return amountDone.length;
     }
 
     const totalLength = () => {
         if (paperData.length > 0) return paperData.length
         else return amountOfPapersDone() + 1
     }
-
+    
     return (
-        <Card className="row-start-2 col-span-3 row-span-5">
-            <CardHeader className="pb-0">
-                <CardTitle>Oversikt</CardTitle>
-                <CardDescription>{date.getDate()}. {getMonthFromIndex(date.getMonth())} {date.getFullYear()}</CardDescription>
-            </CardHeader>
-            <CardContent className="flex-1 pb-0">
-                {
-                    paperData.length < 1 ?
-                        <Skeleton className="w-full h- rounded-lg p-5"></Skeleton> :
+        
+        paperData[0].releases[dateStr] ? 
 
-                        <ChartContainer
-                            config={chartConfig}
-                            className="mx-auto aspect-square"
-                        >
-                            <RadialBarChart
-                                data={chartData}
-                                startAngle={0}
-                                endAngle={calculateSectorDegrees(amountOfPapersDone(), totalLength())}
-                                innerRadius={80}
-                                outerRadius={120}
-                            >
-                                <PolarGrid
-                                    gridType="circle"
-                                    radialLines={false}
-                                    stroke="none"
-                                    className="first:fill-muted last:fill-background"
-                                    polarRadius={[86, 74]}
-                                />
-                                <RadialBar dataKey="visitors" background cornerRadius={10} />
-                                <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
-                                    <Label
-                                        content={({ viewBox }) => {
-                                            if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-                                                return (
-                                                    <text
-                                                        x={viewBox.cx}
-                                                        y={viewBox.cy}
-                                                        textAnchor="middle"
-                                                        dominantBaseline="middle"
-                                                    >
-                                                        <tspan
-                                                            x={viewBox.cx}
-                                                            y={viewBox.cy}
-                                                            className="fill-foreground text-4xl font-bold"
-                                                        >
-                                                            {amountOfPapersDone()}
-                                                        </tspan>
-                                                        <tspan
-                                                            x={viewBox.cx}
-                                                            y={(viewBox.cy || 0) + 24}
-                                                            className="fill-muted-foreground"
-                                                        >
-                                                            Aviser ferdigstilt
-                                                        </tspan>
-                                                    </text>
-                                                )
-                                            }
-                                        }}
-                                    />
-                                </PolarRadiusAxis>
-                            </RadialBarChart>
-                        </ChartContainer>
 
-                }
-            </CardContent>
 
-        </Card>
-    )
+        <ChartContainer
+            config={chartConfig}
+            className="mx-auto aspect-square"
+        >
+            <RadialBarChart
+                data={chartData}
+                startAngle={0}
+                endAngle={calculateSectorDegrees(amountOfPapersDone(), totalLength())}
+                innerRadius={80}
+                outerRadius={120}
+            >
+                <PolarGrid
+                    gridType="circle"
+                    radialLines={false}
+                    stroke="none"
+                    className="first:fill-muted last:fill-background"
+                    polarRadius={[86, 74]}
+                />
+                <RadialBar dataKey="visitors" background cornerRadius={10} />
+                <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
+                    <Label
+                        content={({ viewBox }) => {
+                            if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                                return (
+                                    <text
+                                        x={viewBox.cx}
+                                        y={viewBox.cy}
+                                        textAnchor="middle"
+                                        dominantBaseline="middle"
+                                    >
+                                        <tspan
+                                            x={viewBox.cx}
+                                            y={viewBox.cy}
+                                            className="fill-foreground text-4xl font-bold"
+                                        >
+                                            {amountOfPapersDone()}
+                                        </tspan>
+                                        <tspan
+                                            x={viewBox.cx}
+                                            y={(viewBox.cy || 0) + 24}
+                                            className="fill-muted-foreground"
+                                        >
+                                            Aviser ferdigstilt
+                                        </tspan>
+                                    </text>
+                                )
+                            }
+                        }}
+                    />
+                </PolarRadiusAxis>
+            </RadialBarChart>
+        </ChartContainer>
+
+        : 
+
+        <Skeleton></Skeleton>
+    ) 
 }

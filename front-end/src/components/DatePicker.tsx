@@ -9,22 +9,27 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
-import { getDayFromIndex } from "./formattingFunctions"
+import { getDateFormatted, getDayFromIndex } from "./formattingFunctions"
+import { useNavigate } from "react-router-dom"
 
-export function DatePicker(props: {date:Date, setNewDate:(newDate: Date) => void, className:string}) {
-    
-    const date = props.date 
+export function DatePicker(props: { date: Date, setNewDate: (newDate: Date) => void, className: string }) {
+
+    const date = props.date
     const setNewDate = props.setNewDate
+    const navigate = useNavigate()
 
 
-    const handleUpdateDate = (newDate : Date | undefined) => {
-        if (!newDate) return 
-        setNewDate(newDate)
+    const handleUpdateDate = (newDate: Date | undefined) => {
+        const formatted = getDateFormatted(newDate)
+        if (newDate) {
+            setNewDate(newDate)
+        }
+        navigate(`/${formatted}`)
     }
 
     return (
 
-        
+
         <Popover>
             <PopoverTrigger asChild>
                 <Button
@@ -35,7 +40,7 @@ export function DatePicker(props: {date:Date, setNewDate:(newDate: Date) => void
                     )}
                 >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {date ?  `${getDayFromIndex((date.getDay() + 6) % 7)} ${date.getDate()}.${date.getMonth()}.${date.getFullYear()}` : <span>Velg en dato</span>}
+                    {date ? `${getDayFromIndex((date.getDay() + 6) % 7)} ${date.getDate()}.${date.getMonth()}.${date.getFullYear()}` : <span>Velg en dato</span>}
                 </Button>
             </PopoverTrigger>
             <PopoverContent className=" w-auto p-2">
