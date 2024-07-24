@@ -65,7 +65,7 @@ export default function Dashboard() {
 
                                 papers.length === 0 ?
 
-                                    <p className="text-sm">Inge aviser hentet. </p>
+                                    <p className="text-sm">Ingen aviser hentet. </p>
 
                                     :
 

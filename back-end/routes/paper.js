@@ -170,7 +170,6 @@ router.patch("/:id", async (req, res) => {
         const updates = {
             $set: {
                 name: req.body.name,
-                productionStatus: req.body.productionStatus,
                 pattern: req.body.pattern
             }
         }
@@ -182,6 +181,63 @@ router.patch("/:id", async (req, res) => {
         res.status(500).send("Error updating paper")
     }
 })
+
+
+// Define the allowed status values
+const allowedStatuses = ["notStarted", "inProduction", "done"];
+router.patch("/:paperName/:date/:status", async (req, res) => {
+    try {
+        const paperName = req.params.paperName;
+        const dateString = req.params.date;
+        const newStatus = req.params.status;
+        const date = new Date(dateString);
+
+        // Check for valid date format
+        if (isNaN(date.getTime())) {
+            return res.status(400).send("Invalid date format " + dateString + " expected /YYYY-MM-DD");
+        }
+
+        // Validate status
+        if (!allowedStatuses.includes(newStatus)) {
+            return res.status(400).send("Invalid status. Allowed values are: " + allowedStatuses.join(", "));
+        }
+
+        const collection = db.collection("papers");
+
+        // Find the paper by name
+        const paper = await collection.findOne({ nameLowerCase: paperName });
+
+        if (!paper) {
+            return res.status(404).send("Paper not found");
+        }
+
+        // Ensure the releases object exists and has an entry for the date
+        const releases = paper.releases || {};
+        if (!releases[dateString]) {
+            releases[dateString] = { productionStatus: newStatus };
+
+            // Update the paper in the database
+            await collection.updateOne(
+                { nameLowerCase: paperName },
+                { $set: { [`releases.${dateString}`]: { productionStatus: newStatus } } }
+            );
+        } else {
+            // Update the production status if the date exists
+            await collection.updateOne(
+                { nameLowerCase: paperName },
+                { $set: { [`releases.${dateString}.productionStatus`]: newStatus } }
+            );
+        }
+
+        // Return the updated paper info
+        const updatedPaper = await collection.findOne({ nameLowerCase: paperName });
+        res.status(200).json(updatedPaper);
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Internal Server Error");
+    }
+});
 
 
 
