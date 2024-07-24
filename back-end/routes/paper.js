@@ -50,9 +50,13 @@ router.get("/:date", async (req, res) => {
     result = result.filter((paper) => paper.pattern.includes(dayOfWeek));
 
     // Make sure date exists in all papers supposed to release on this day.
-    result = result.map((paper) => {
+    result = result.map(async (paper) => {
         if (!(date in paper.releases)) {
-            paper.releases[date] = { productionStatus: "notStarted" };
+            // Update the paper in the database
+            await collection.updateOne(
+                { name: paper.name },
+                { $set: { [`releases.${date}`]: { productionStatus: "notStarted" } } }
+            );
         }
         return paper;
     });
@@ -92,8 +96,8 @@ router.post("/", async (req, res) => {
             pattern: req.body.pattern,
             info: req.body.info,
             deadline: req.body.deadline,
-            
-            releases : []
+
+            releases: []
         }
         let collection = await db.collection("papers")
         let result = await collection.insertOne(newPaper)
