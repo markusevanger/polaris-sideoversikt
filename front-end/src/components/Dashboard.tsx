@@ -64,15 +64,12 @@ export default function Dashboard() {
             <DatePicker className={"col-span-4 overflow-hidden"} date={date} setNewDate={(newDate: Date) => setDate(newDate)} />
             <div className=" col-span-5"></div>
 
-            {
-                /*
 
             <RadialChart date={date} dateStr={dateStr} paperData={papers}></RadialChart>
-            <RadialChart date={date} dateStr={dateStr} paperData={papers}></RadialChart>
-            <RadialChart date={date} dateStr={dateStr} paperData={papers}></RadialChart>
 
-                */
-            }
+
+
+
 
 
 

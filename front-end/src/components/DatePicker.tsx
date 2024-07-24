@@ -16,6 +16,12 @@ export function DatePicker(props: {date:Date, setNewDate:(newDate: Date) => void
     const date = props.date 
     const setNewDate = props.setNewDate
 
+
+    const handleUpdateDate = (newDate : Date | undefined) => {
+        if (!newDate) return 
+        setNewDate(newDate)
+    }
+
     return (
 
         
@@ -36,7 +42,7 @@ export function DatePicker(props: {date:Date, setNewDate:(newDate: Date) => void
                 <Calendar
                     mode="single"
                     selected={date}
-                    onSelect={setNewDate}
+                    onSelect={handleUpdateDate}
                     required={true}
                 />
             </PopoverContent>
