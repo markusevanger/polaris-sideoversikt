@@ -55,8 +55,8 @@ router.get("/:date", async (req, res) => {
 
     // Make sure date exists in all papers supposed to release on this day.
     result = result.map((paper) => {
-        if (!(date in paper.releases)) {
-            paper.releases[date] = { productionStatus: "notStarted" };
+        if (!(date in paper.releaseDates)) {
+            paper.releaseDates[date] = { productionStatus: "notStarted" };
         }
         return paper;
     });
