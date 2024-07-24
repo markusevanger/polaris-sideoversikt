@@ -78,7 +78,8 @@ router.get("/:date", async (req, res) => {
 
 router.get("/:paperName/:date", async (req, res) => {
     try {
-        const { paperName, dateString } = req.params;
+        const paperName = req.params.paperName
+        const dateString = req.params.date;
         const date = new Date(dateString);
 
         // Check for valid date format
