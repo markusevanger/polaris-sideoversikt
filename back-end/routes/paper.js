@@ -102,6 +102,8 @@ router.get("/:paperName/:date", async (req, res) => {
 
         if (releases[dateString]) {
             filteredReleases[dateString] = releases[dateString];
+        } else {
+            filteredReleases[dateString] = "notStarted"
         }
 
         // Return the paper info with the filtered releases
