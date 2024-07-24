@@ -37,7 +37,7 @@ export default function Dashboard() {
     }
     useEffect(() => {
         getPapers()
-    }, [papers.length])
+    }, [date])
 
     return (
         <>

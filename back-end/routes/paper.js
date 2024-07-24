@@ -43,7 +43,7 @@ router.get("/:date", async (req, res) => {
  
 
     let collection = await db.collection("papers")
-    let result = await collection.find({}).toArray(); // Convert the result to an array
+    let result = await collection.find({releaseDates : date}).toArray(); // Convert the result to an array
     
     result.map((paper) => {
         console.log(paper.releaseDates)
@@ -51,7 +51,7 @@ router.get("/:date", async (req, res) => {
 
     result = result.filter((paper) => paper.releaseDates.includes(dayOfWeek));
 
-    if (!result | result.length === 0) {
+    if (!result | result.length === 0 ) {
         res.status(404).send("Not Found");
     } else {
         res.status(200).json(result); // Use res.json to send the response
@@ -99,20 +99,6 @@ router.post("/", async (req, res) => {
         res.status(500).send("Error adding paper")
     }
 })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 // Update Paper by Id
