@@ -78,7 +78,7 @@ router.get("/:date", async (req, res) => {
 
 router.get("/:paperName/:date", async (req, res) => {
     try {
-        const paperName = req.params.paperName
+        const paperName = req.params.paperName;
         const dateString = req.params.date;
         const date = new Date(dateString);
 
@@ -98,12 +98,17 @@ router.get("/:paperName/:date", async (req, res) => {
 
         // Filter the releases to only include the entry for the specified date
         const releases = paper.releases || {};
-        const filteredReleases = {};
+        const filteredReleases = { ...releases };
 
-        if (releases[dateString]) {
-            filteredReleases[dateString] = releases[dateString];
-        } else {
-            filteredReleases[dateString] = "notStarted"
+        // Check if the date exists in releases; if not, add it
+        if (!filteredReleases[dateString]) {
+            filteredReleases[dateString] = { productionStatus: "notStarted" };
+
+            // Update the paper in the database
+            await collection.updateOne(
+                { nameLowerCase: paperName },
+                { $set: { [`releases.${dateString}`]: { productionStatus: "notStarted" } } }
+            );
         }
 
         // Return the paper info with the filtered releases
@@ -117,6 +122,7 @@ router.get("/:paperName/:date", async (req, res) => {
         res.status(500).send("Internal Server Error");
     }
 });
+
 
 // Get all data for single paper
 router.get("/:nameLowerCase", async (req, res) => {
