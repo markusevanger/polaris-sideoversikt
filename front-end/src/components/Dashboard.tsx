@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { buttonVariants } from "./ui/button"
-import { Link } from "react-router-dom"
+import { Link, useParams } from "react-router-dom"
 import { ScrollArea, ScrollBar } from "./ui/scroll-area"
 import { cn } from "@/lib/utils"
 import AddPaperDialog from "./addPaperDialog"
@@ -8,7 +8,7 @@ import { DatePicker } from "./DatePicker"
 import { statusEmoji } from "./formattingFunctions"
 
 
-const getDateFormatted = (date: Date) => {
+const getDateFormatted = (date: Date | undefined) => {
     if (date) {
         const year = date.getFullYear();
         const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -19,9 +19,17 @@ const getDateFormatted = (date: Date) => {
 }
 const URL = "https://api.markusevanger.no/polaris/papers"
 export default function Dashboard() {
+    
+    const params = useParams()
+    const dateStr = params.date?.toString() || undefined
+
+    let selectedDate = new Date()
+    if (dateStr){
+        selectedDate = new Date(dateStr)
+    }
 
     const [papers, setPapers] = useState([])
-    const [date, setDate] = useState<Date | undefined>(new Date())
+    const [date, setDate] = useState<Date>(selectedDate)
 
 
 
@@ -50,7 +58,7 @@ export default function Dashboard() {
 
                         <div className="p-1">
 
-                            <DatePicker date={date} setNewDate={((newDate: Date | undefined) => setDate(newDate))}></DatePicker>
+                            <DatePicker date={date} setNewDate={((newDate: Date) => setDate(newDate))}></DatePicker>
 
                         </div>
 
@@ -73,7 +81,7 @@ export default function Dashboard() {
 
                                     papers.map((paper: any, index: number) => {
                                         return (
-                                            <Link key={index} className={cn(buttonVariants({ variant: "outline" }), "w-full mt-1")} to={`/${paper.nameLowerCase}/${getDateFormatted(date!!)}`}> {statusEmoji(paper.productionStatus)} {paper.name}</Link>
+                                            <Link key={index} className={cn(buttonVariants({ variant: "outline" }), "w-full mt-1")} to={`/${paper.nameLowerCase}/${getDateFormatted(date!!)}`}> { statusEmoji(paper.releases[getDateFormatted(date)])} {paper.name}</Link>
                                         )
                                     })
 
@@ -91,8 +99,6 @@ export default function Dashboard() {
 
                     </div>
                 </div>
-
-
             </div>
         </>
 

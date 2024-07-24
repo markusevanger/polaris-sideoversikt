@@ -114,7 +114,7 @@ export default function Details() {
 
                 <div className="flex flex-col gap-2 ">
                     <div className="flex justify-between">
-                        <Link to={"/"} className={cn(buttonVariants({ variant: "outline" }), "max-w-40")}> <ChevronLeft /> Til Dashbord</Link>
+                        <Link to={`/${date}`} className={cn(buttonVariants({ variant: "outline" }), "max-w-40")}> <ChevronLeft /> Til Dashbord</Link>
                         {/*<DeleteDialog paper={paper}></DeleteDialog>*/}
                     </div>
 
@@ -126,8 +126,6 @@ export default function Details() {
                         </div>
 
                     </div>
-
-
                 </div>
 
                 <div className="grid grid-cols-4 grid-rows-4 p-3 h-full gap-4">

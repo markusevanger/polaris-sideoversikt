@@ -63,7 +63,7 @@ router.get("/:date", async (req, res) => {
         let papers = await collection.find({ pattern: dayOfWeek }).toArray();
 
         if (papers.length === 0) {
-            return res.status(404).send("No papers found for the specified date.");
+            return res.status(200).send("No papers found for the specified date.");
         }
 
         // Update each paper to only keep the releases for the specified date

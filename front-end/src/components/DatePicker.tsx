@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/popover"
 import { getDayFromIndex } from "./formattingFunctions"
 
-export function DatePicker(props: {date:Date | undefined, setNewDate:(newDate: Date | undefined) => void}) {
+export function DatePicker(props: {date:Date, setNewDate:(newDate: Date) => void}) {
     
     const date = props.date 
     const setNewDate = props.setNewDate
@@ -37,6 +37,7 @@ export function DatePicker(props: {date:Date | undefined, setNewDate:(newDate: D
                     mode="single"
                     selected={date}
                     onSelect={setNewDate}
+                    required={true}
                 />
             </PopoverContent>
         </Popover>
