@@ -37,32 +37,28 @@ router.get("/", async (req, res) => {
 // Get all papers releasing on single date. 
 router.get("/:date", async (req, res) => {
     try {
-        const date = new Date(req.params.date);
+        const dateString = req.params.date;
+        const date = new Date(dateString);
         const dayOfWeek = (date.getDay() + 6) % 7;
-        const dateString = req.params.date; // Use the date string from the request parameters
 
-        console.log("Getting newspapers from: " + req.params.date + " " + dayOfWeek);
+        console.log("Getting newspapers from: " + dateString + " " + dayOfWeek);
 
-        const collection = db.collection("papers"); // Replace with your database name
-        let result = await collection.find({}).toArray(); // Convert the result to an array
+        const collection = db.collection("papers");
 
-        // Remove any papers that aren't supposed to release on this day.
-        result = result.filter((paper) => paper.pattern.includes(dayOfWeek));
+        // Query papers that include the specific day in their pattern
+        let result = await collection.find({ pattern: dayOfWeek }).toArray();
 
-        // Iterate over each paper and update the database
+        // Update each paper if the date is not in releases
         await Promise.all(result.map(async (paper) => {
-            // Ensure the releases property exists and is an object
             if (!paper.releases || typeof paper.releases !== 'object' || Array.isArray(paper.releases)) {
                 paper.releases = {};
             }
 
-            // Check if the date exists in releases
             if (!(dateString in paper.releases)) {
                 paper.releases[dateString] = { productionStatus: "notStarted" };
 
-                // Update the paper in the database
                 await collection.updateOne(
-                    { name: paper.name },
+                    { _id: paper._id }, // Use _id to ensure correct document is updated
                     { $set: { [`releases.${dateString}`]: { productionStatus: "notStarted" } } }
                 );
             }
@@ -71,7 +67,7 @@ router.get("/:date", async (req, res) => {
         if (!result || result.length === 0) {
             res.status(404).send("Not Found");
         } else {
-            res.status(200).json(result); // Use res.json to send the response
+            res.status(200).json(result);
         }
     } catch (err) {
         console.error(err);
