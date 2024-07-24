@@ -1,7 +1,4 @@
 
-
-"use client"
-
 import {
     Label,
     PolarGrid,
@@ -41,7 +38,7 @@ export function RadialChart(props: { paperData: Paper[], dateStr: string, date: 
 
     const paperData = props.paperData
     const dateStr = props.dateStr
-    const date = props.date
+    // const date = props.date
 
     const amountOfPapersDone = () => {
         const amountDone = paperData.filter((paper: Paper) => {
