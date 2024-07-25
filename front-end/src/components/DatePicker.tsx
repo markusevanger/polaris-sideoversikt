@@ -12,7 +12,7 @@ import {
 import { getDateFormatted, getDayFromIndex } from "./formattingFunctions"
 import { useNavigate } from "react-router-dom"
 
-export function DatePicker(props: { date: Date, setNewDate: (newDate: Date) => void, className: string }) {
+export function DatePicker(props: { date: Date, setNewDate: (newDate: Date) => void }) {
 
     const date = props.date
     const setNewDate = props.setNewDate
@@ -35,12 +35,12 @@ export function DatePicker(props: { date: Date, setNewDate: (newDate: Date) => v
                 <Button
                     variant={"outline"}
                     className={cn(
-                        "w-full h-full text-center font-normal",
-                        !date && "text-muted-foreground", props.className
+                        "text-center font-normal",
+                        !date && "text-muted-foreground", 
                     )}
                 >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {date ? `${getDayFromIndex((date.getDay() + 6) % 7)} ${date.getDate()}.${date.getMonth()}.${date.getFullYear()}` : <span>Velg en dato</span>}
+                    {date ? `${getDayFromIndex((date.getDay() + 6) % 7)} ${date.getDate()}.${date.getMonth()+1}.${date.getFullYear()}` : <span>Velg en dato</span>}
                 </Button>
             </PopoverTrigger>
             <PopoverContent className=" w-auto p-2">

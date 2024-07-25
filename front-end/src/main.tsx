@@ -2,34 +2,35 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
-import {createBrowserRouter, RouterProvider} from "react-router-dom"
+import { createBrowserRouter, RouterProvider } from "react-router-dom"
 import Dashboard from "./components/Dashboard.tsx"
 import Details from "./components/Details.tsx"
+import { siteNameStorageKey, ThemeProvider } from './components/theme-provider.tsx'
 
 
 const router = createBrowserRouter([
   {
-    path:"/",
-    element: <App/>,
+    path: "/",
+    element: <App />,
     children: [
       {
-        path:"/:date",
-        element: <Dashboard/>
+        path: "/:date",
+        element: <Dashboard />
       },
       {
-        path:"/",
-        element: <Dashboard/>
+        path: "/",
+        element: <Dashboard />
       }
     ]
   },
 
   {
-    path:"/:name/:date",
-    element: <App/>,
+    path: "/:name/:date",
+    element: <App />,
     children: [
       {
-        path:"/:name/:date",
-        element: <Details/>
+        path: "/:name/:date",
+        element: <Details />
       }
     ]
   },
@@ -38,6 +39,9 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <RouterProvider router={router}/>
+    <ThemeProvider defaultTheme="dark" storageKey={siteNameStorageKey}>
+      <RouterProvider router={router} />
+    </ThemeProvider>
+
   </React.StrictMode>,
 )

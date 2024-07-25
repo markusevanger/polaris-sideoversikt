@@ -1,3 +1,5 @@
+import { Paper } from "./Paper"
+
 export function statusEmoji(productionStatus: string) {
     if (productionStatus == "notStarted") return "🔴"
     else if (productionStatus == "inProduction") return "🟠"
@@ -49,4 +51,13 @@ export const getDateFormatted = (date: Date | undefined) => {
         return `${year}-${month}-${day}`;
     }
     return '';
+}
+
+
+
+export const amountOfPapers = (status:"notStarted" | "inProduction" | "done", paperData:Paper[], dateFormatted:string) => {
+    return paperData.filter((paper: Paper) => {
+        const release = paper.releases[dateFormatted];
+        return release && release.productionStatus === status;
+    }).length;
 }

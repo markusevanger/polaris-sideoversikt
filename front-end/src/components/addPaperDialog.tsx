@@ -17,8 +17,6 @@ import { CirclePlus } from "lucide-react"
 import { useState } from "react"
 import { Textarea } from "./ui/textarea"
 import { getDayFromIndex } from "./formattingFunctions"
-import { Paper } from "./Paper"
-
 
 
 
