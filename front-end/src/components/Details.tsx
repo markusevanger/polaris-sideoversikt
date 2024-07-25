@@ -37,7 +37,7 @@ export default function Details() {
         nameLowerCase: "",
         info: "",
         deadline: "",
-        productionStatus : ""
+        productionStatus: ""
 
     })
 
@@ -108,56 +108,60 @@ export default function Details() {
     return (
 
         <>
+            <div className="w-full flex justify-center ">
 
-            <div className="h-screen w-full p-5 flex flex-col">
-
-                <div className="flex flex-col gap-2 ">
-                    <div className="flex justify-between">
-                        <Link to={`/${date}`} className={cn(buttonVariants({ variant: "outline" }), "max-w-40")}> <ChevronLeft /> Til Dashbord</Link>
-                        {/*<DeleteDialog paper={paper}></DeleteDialog>*/}
-                    </div>
-
-                    <div className="flex flex-col gap-2">
-                        <h1 className="text-2xl font-bold">{paper.name}</h1>
-                        <div className="flex gap-1">
-                            <Badge>{dateObj.getDate()}. {getMonthFromIndex(dateObj.getMonth())} {dateObj.getFullYear()}</Badge>
-                            <p className="text- text-foreground" >Trykkfrist: {paper.deadline}</p>
+                <div className="h-screen w-full p-5 flex flex-col gap-5 max-w-[1500px]">
+                    <div className="flex flex-col gap-2 ">
+                        <div className="flex justify-between">
+                            <Link to={`/${date}`} className={cn(buttonVariants({ variant: "outline" }), "max-w-40")}> <ChevronLeft /> Til Dashbord</Link>
+                            {/*<DeleteDialog paper={paper}></DeleteDialog>*/}
                         </div>
 
+                        <div className="flex flex-col gap-2">
+                            <h1 className="text-2xl font-bold">{paper.name}</h1>
+                            <div className="flex gap-1">
+                                <Badge>{dateObj.getDate()}. {getMonthFromIndex(dateObj.getMonth())} {dateObj.getFullYear()}</Badge>
+                                <p className="text- text-foreground" >Trykkfrist: {paper.deadline}</p>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-4 grid-rows-4 h-full gap-4">
+
+                        <Card className="h-full p-3 col-span-2">
+                            <CardTitle className="text-sm">Status</CardTitle>
+                            <CardContent className="h-full">
+                                <div className="flex h-full justify-center items-center">
+                                    <Select onValueChange={(value: "notStarted" | "inProduction" | "done") => { updateProductionStatus(value) }}>
+                                        <SelectTrigger className="w-[180px]">
+                                            <SelectValue placeholder={` ${statusEmoji(paper.productionStatus)} ${getStatusText(paper.productionStatus)} `} />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="notStarted">🔴 Ikke Begynt</SelectItem>
+                                            <SelectItem value="inProduction">🟠 I Produksjon</SelectItem>
+                                            <SelectItem value="done">🟢 Ferdig</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <Card className="h-full p-3 col-span-2">
+                            <CardTitle className="flex w-full"><Info className={iconStyle}></Info></CardTitle>
+                            <CardContent className="text-xs">{paper.info || "Ingen info oppgitt."}</CardContent>
+                        </Card>
+
+
+                        <Card className="col-span-4 row-span-3 ">
+                            <div className="h-full w-full flex justify-center items-center">
+                                🚧🏗️
+                            </div>
+
+                        </Card>
+
                     </div>
                 </div>
-
-                <div className="grid grid-cols-4 grid-rows-4 p-3 h-full gap-4">
-
-                    <Card className="h-full p-3 col-span-2">
-                        <CardTitle className="text-sm">Status</CardTitle>
-                        <CardContent className="h-full">
-                            <div className="flex h-full justify-center items-center">
-                                <Select onValueChange={(value: "notStarted" | "inProduction" | "done") => { updateProductionStatus(value) }}>
-                                    <SelectTrigger className="w-[180px]">
-                                        <SelectValue placeholder={` ${statusEmoji(paper.productionStatus)} ${getStatusText(paper.productionStatus)} `} />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="notStarted">🔴 Ikke Begynt</SelectItem>
-                                        <SelectItem value="inProduction">🟠 I Produksjon</SelectItem>
-                                        <SelectItem value="done">🟢 Ferdig</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="h-full p-3 col-span-2">
-                        <CardTitle className="flex w-full"><Info className={iconStyle}></Info></CardTitle>
-                        <CardContent className="text-xs">{paper.info || "Ingen info oppgitt."}</CardContent>
-                    </Card>
-
-                </div>
-
-
-
-
-
             </div>
 
         </>

@@ -14,7 +14,7 @@ import { Skeleton } from "./ui/skeleton"
 import { BigNumberCard } from "./BigNumberCard"
 
 
-import { Newspaper, PieChart, LayoutDashboard } from "lucide-react"
+import { Newspaper, PieChart, LayoutDashboard, Activity } from "lucide-react"
 import { Badge } from "./ui/badge"
 import ToggleDarkModeButton from "./ToggleDarkModeButton"
 
@@ -60,17 +60,19 @@ export default function Dashboard() {
     }, [date])
 
     return (
-        <div className="w-full flex justify-center">
+        <div className="w-full flex justify-center ">
 
 
-            <div className="w-full max-w-[1500px] h-screen flex flex-col p-5 gap-3 items-center justify-center">
+            <div className="mt-5 w-full max-w-[1500px] h-screen flex flex-col p-5 gap-3 items-center justify-center">
                 <div className="w-full">
                     <div className="flex gap-3">
                         <h1 className="text-lg font-bold flex gap-2 p-0 m-0"><LayoutDashboard />Sideoversikt</h1>
 
-                        <Badge variant={"secondary"} className="text-sm font-mono">
+                        <Badge variant={"secondary"} className="text-sm font-mono flex gap-2 flex-wrap text-wrap">
+                            
+                            <Activity className="h-4 w-auto"/>
                             {
-                                lastUpdated ? `Sist oppdatert: ${lastUpdated.getHours()}:${lastUpdated.getMinutes()}:${lastUpdated.getSeconds()}` : "Laster..."
+                                lastUpdated ? `${lastUpdated.getHours()}:${lastUpdated.getMinutes()}:${lastUpdated.getSeconds()}` : "Laster..."
                             }
                         </Badge>
 
