@@ -18,7 +18,7 @@ router.get("/", async (req, res) => {
 router.post("/", async (req, res) => {
     try {
         let collection = await db.collection("feedback")
-        let result = await collection.insertOne({ feedback: req.body.feedback })
+        let result = await collection.insertOne({ feedback: req.body.feedback, time: new Date()})
         res.status(201).send(result)
 
     } catch (err) {

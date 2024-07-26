@@ -6,6 +6,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom"
 import Dashboard from "./components/Dashboard.tsx"
 import Details from "./components/Details.tsx"
 import { siteNameStorageKey, ThemeProvider } from './components/theme-provider.tsx'
+import Feedback from './components/Feedback.tsx'
 
 
 const router = createBrowserRouter([
@@ -31,6 +32,17 @@ const router = createBrowserRouter([
       {
         path: "/:name/:date",
         element: <Details />
+      }
+    ]
+  },
+
+  {
+    path: "/feedback",
+    element: <App />,
+    children: [
+      {
+        path: "/feedback",
+        element: <Feedback />
       }
     ]
   },

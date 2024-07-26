@@ -59,9 +59,7 @@ export default function AddPaperDialog(props : {getPapers:any}) {
             // give feedback here
         }
         catch (err) {
-            //console.log("A problem occcured: " + error)
-        } finally {
-
+            console.log("A problem occcured: " + err)
         }
     }
 

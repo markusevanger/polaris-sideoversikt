@@ -22,13 +22,30 @@ export default function FeedbackDialog() {
     const [isOpen, setOpen] = useState(false)
     const [feedback, setFeedback] = useState("")
 
-    const URL = "https://api.markusevanger.no/polaris/papers"
     const handleSubmit = async () => {
-        
+        try {
+            const response = await fetch("https://api.markusevanger.no/polaris/feedback", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({feedback : feedback})
+            })
 
-        
-        
-        
+            if (!response.ok) {
+                //throw new Error(`HTTP Error! Status ${response.status}`)
+            }
+
+            console.log(response.status + ": " + response.statusText)
+            setOpen(false)
+
+            // give feedback here
+        }
+        catch (err) {
+            console.log("A problem occcured: " + err)
+        }
+
+
         setOpen(false)
     }
 
@@ -42,7 +59,7 @@ export default function FeedbackDialog() {
                     <DialogTitle className="flex gap-1 items-center"><MessageSquareHeart className="" /> Skriv tilbakemelding</DialogTitle>
                     <DialogDescription>Skriv hva enn du tenker om produktet her! All tilbakemelding blir lest av utvikler!</DialogDescription>
                     <div>
-                        <Textarea value={feedback} onChange={(e) => { setFeedback(e.target.value) }} className="min-h-[200px]" placeholder="Bra jobba markus :)"/>
+                        <Textarea value={feedback} onChange={(e) => { setFeedback(e.target.value) }} className="min-h-[200px]" placeholder="Bra jobba markus :)" />
                     </div>
 
 
