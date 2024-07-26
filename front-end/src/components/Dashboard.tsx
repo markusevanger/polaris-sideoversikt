@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { buttonVariants } from "./ui/button"
+import { Button, buttonVariants } from "./ui/button"
 import { Link, useParams } from "react-router-dom"
 import { ScrollArea, ScrollBar } from "./ui/scroll-area"
 import { cn } from "@/lib/utils"
@@ -14,9 +14,17 @@ import { Skeleton } from "./ui/skeleton"
 import { BigNumberCard } from "./BigNumberCard"
 
 
-import { Newspaper, PieChart, LayoutDashboard, Activity } from "lucide-react"
+import { Newspaper, PieChart, LayoutDashboard, Activity, MessageSquareMore } from "lucide-react"
 import { Badge } from "./ui/badge"
 import ToggleDarkModeButton from "./ToggleDarkModeButton"
+
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip"
+import FeedbackDialog from "./feedbackDialog"
 
 
 const URL = "https://api.markusevanger.no/polaris/papers"
@@ -69,8 +77,8 @@ export default function Dashboard() {
                         <h1 className="text-lg font-bold flex gap-2 p-0 m-0"><LayoutDashboard />Sideoversikt</h1>
 
                         <Badge variant={"secondary"} className="text-sm font-mono flex gap-2 flex-wrap text-wrap">
-                            
-                            <Activity className="h-4 w-auto"/>
+
+                            <Activity className="h-4 w-auto" />
                             {
                                 lastUpdated ? `${lastUpdated.getHours()}:${lastUpdated.getMinutes()}:${lastUpdated.getSeconds()}` : "Laster..."
                             }
@@ -82,11 +90,42 @@ export default function Dashboard() {
 
                 </div>
 
+                <TooltipProvider>
+                    <div className="flex gap-1 justify-between  w-full row-start-2">
+                        <Tooltip>
+                            <TooltipTrigger>
+                                <DatePicker date={date} setNewDate={(newDate: Date) => setDate(newDate)} />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Endre dato for oversikt</p>
+                            </TooltipContent>
 
-                <div className="flex gap-1 justify-between  w-full row-start-2">
-                    <DatePicker date={date} setNewDate={(newDate: Date) => setDate(newDate)} />
-                    <ToggleDarkModeButton />
-                </div>
+                        </Tooltip>
+                        <div className="flex gap-1">
+
+                            <Tooltip>
+                                <TooltipTrigger>
+                                    <FeedbackDialog />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>Skriv tilbakemelding</p>
+                                </TooltipContent>
+                            </Tooltip>
+
+                            <Tooltip>
+                                <TooltipTrigger><ToggleDarkModeButton />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>Endre tema</p>
+                                </TooltipContent>
+                            </Tooltip>
+
+
+                        </div>
+
+                    </div>
+                </TooltipProvider>
+
 
                 <div className="grid gap-3 w-full">
 
@@ -128,10 +167,14 @@ export default function Dashboard() {
                                             const release = paper.releases[getDateFormatted(date)];
 
                                             return (
-                                                <div key={index}>
-                                                    <Link className={cn(buttonVariants({ variant: "outline" }), "w-full mt-1 justify-start")} to={`/${paper.nameLowerCase}/${getDateFormatted(date)}`}>
+                                                <div key={index} className={cn(buttonVariants({ variant: "outline" }), "flex justify-between mb-1 items-center")}>
+                                                    <Link className={"w-full justify-start"} to={`/${paper.nameLowerCase}/${getDateFormatted(date)}`}>
                                                         {release ? statusEmoji(release.productionStatus) : '❓'} {paper.name}
                                                     </Link>
+                                                    <Badge variant={"secondary"}>
+                                                        <p className="font-mono text-xs text-muted-foreground">{paper.deadline}</p>
+                                                    </Badge>
+
                                                 </div>
 
                                             )
@@ -149,6 +192,6 @@ export default function Dashboard() {
                 </div>
 
             </div >
-        </div>
+        </div >
     )
 }
