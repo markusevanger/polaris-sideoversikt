@@ -324,11 +324,6 @@ router.patch("/setHiddenStatus/:paperName/:date/:isHidden", async (req, res) => 
             return res.status(400).send("Invalid date format " + dateString + " expected /YYYY-MM-DD");
         }
 
-        // Validate status
-        if (!allowedStatuses.includes(newStatus)) {
-            return res.status(400).send("Invalid status. Allowed values are: " + allowedStatuses.join(", "));
-        }
-
         const collection = db.collection("papers");
 
         // Find the paper by name
