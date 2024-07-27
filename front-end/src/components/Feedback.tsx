@@ -1,11 +1,15 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent } from "./ui/card"
+import { LayoutDashboard, MessageSquareHeart } from "lucide-react"
+import { Badge } from "./ui/badge"
+import { buttonVariants } from "./ui/button"
+import { Link } from "react-router-dom"
 
 
 interface Feedback {
     ObjectId: number,
     feedback: string,
-    time: Date
+    time: string
 }
 
 export default function Feedback() {
@@ -40,16 +44,30 @@ export default function Feedback() {
 
 
             <div className="w-full max-w-[800px] p-5">
+
+                <Link className={buttonVariants({variant: "outline"})} to="/">
+                    <LayoutDashboard className="w-5 mr-2"/> Sideoversikt
+                </Link>
+ 
                 <h1 className="text-lg font-bold">Feedback</h1>
 
-                <div className="mt-5 h-full">
+                <div className="mt-5 h-full flex flex-col gap-4">
                     {
-                        feedbacks.map((feedback: Feedback) => {
+                        feedbacks.map((feedback: Feedback, index: number) => {
                             return (
-                                <Card>
-                                    <CardContent className="flex flex-col">
-                                        {feedback.time.getDate()}
-                                        {feedback.feedback}
+                                <Card key={index}>
+                                    <CardContent className="p-3 pb-4 flex flex-col h-full">
+                                        <div className="flex w-full justify-between ">
+                                            <MessageSquareHeart></MessageSquareHeart>
+                                            <Badge variant={"secondary"}>
+                                                <p className="text-sm text-muted-foreground font-mono">{feedback.time}</p>
+                                            </Badge>
+                                        </div>
+
+                                        <div>
+
+                                        </div>
+                                        <p>{feedback.feedback}</p>
                                     </CardContent>
                                 </Card>
                             )

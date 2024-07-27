@@ -1,7 +1,7 @@
 
 
 
-/*
+
 import { Dialog, DialogTitle, DialogContent, DialogDescription, DialogHeader, DialogTrigger } from "./ui/dialog"
 import { Button } from "./ui/button"
 import { Trash2 } from "lucide-react"
@@ -19,7 +19,7 @@ export function DeleteDialog(props: { paper: Paper }) {
     // This method will delete a record
     async function deleteRecord() {
 
-        console.log(`${URL}/${paper._id}`)
+        const URL = (`https://api.markusevanger.no/polaris/papers`)
 
         const result = await fetch(`${URL}/${paper._id}`, {
             method: "DELETE",
@@ -52,6 +52,3 @@ export function DeleteDialog(props: { paper: Paper }) {
         </Dialog>
     )
 }
-
-
-*/

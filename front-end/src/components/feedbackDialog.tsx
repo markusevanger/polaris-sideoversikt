@@ -38,6 +38,7 @@ export default function FeedbackDialog() {
 
             console.log(response.status + ": " + response.statusText)
             setOpen(false)
+            setFeedback("")
 
             // give feedback here
         }
@@ -59,7 +60,7 @@ export default function FeedbackDialog() {
                     <DialogTitle className="flex gap-1 items-center"><MessageSquareHeart className="" /> Skriv tilbakemelding</DialogTitle>
                     <DialogDescription>Skriv hva enn du tenker om produktet her! All tilbakemelding blir lest av utvikler!</DialogDescription>
                     <div>
-                        <Textarea value={feedback} onChange={(e) => { setFeedback(e.target.value) }} className="min-h-[200px]" placeholder="Bra jobba markus :)" />
+                        <Textarea value={feedback} onChange={(e) => { setFeedback(e.target.value) }} className="min-h-[200px] max-h-[600px]" placeholder="Bra jobba markus :)" />
                     </div>
 
 

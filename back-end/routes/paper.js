@@ -76,7 +76,7 @@ router.get("/:date", async (req, res) => {
             // Check if the requested date exists in releases
             if (!paper.releases[dateString]) {
                 // Add the requested date with default status if it doesn't exist
-                paper.releases[dateString] = { productionStatus: "notStarted" };
+                paper.releases[dateString] = { productionStatus: "notStarted", hidden:false };
 
                 // Update the paper in the database
                 await collection.updateOne(
@@ -102,7 +102,7 @@ router.get("/:date", async (req, res) => {
 
 
 
-
+// Get paper at specific date.
 router.get("/:paperName/:date", async (req, res) => {
     try {
         const paperName = req.params.paperName;
@@ -136,7 +136,7 @@ router.get("/:paperName/:date", async (req, res) => {
             // Update the paper in the database
             await collection.updateOne(
                 { nameLowerCase: paperName },
-                { $set: { [`releases.${dateString}`]: { productionStatus: "notStarted" } } }
+                { $set: { [`releases.${dateString}`]: { productionStatus: "notStarted", hidden:false } } }
             );
         }
 
@@ -311,6 +311,66 @@ router.patch("/:paperName/:date/:status", async (req, res) => {
 
 
 
+// Update "hidden" status
+router.patch("/:paperName/:date/:isHidden", async (req, res) => {
+    try {
+        const paperName = req.params.paperName;
+        const dateString = req.params.date;
+        const isHidden = req.params.isHidden;
+        const date = new Date(dateString);
+
+        // Check for valid date format
+        if (isNaN(date.getTime())) {
+            return res.status(400).send("Invalid date format " + dateString + " expected /YYYY-MM-DD");
+        }
+
+        // Validate status
+        if (!allowedStatuses.includes(newStatus)) {
+            return res.status(400).send("Invalid status. Allowed values are: " + allowedStatuses.join(", "));
+        }
+
+        const collection = db.collection("papers");
+
+        // Find the paper by name
+        const paper = await collection.findOne({ nameLowerCase: paperName });
+
+        if (!paper) {
+            return res.status(404).send("Paper not found");
+        }
+
+        // Ensure the releases object exists and has an entry for the date
+        const releases = paper.releases || {};
+        if (!releases[dateString]) {
+            releases[dateString] = { hidden:isHidden };
+
+            // Update the paper in the database
+            await collection.updateOne(
+                { nameLowerCase: paperName },
+                { $set: { [`releases.${dateString}`]: { hidden:isHidden } } }
+            );
+        } else {
+            // Update the production status if the date exists
+            await collection.updateOne(
+                { nameLowerCase: paperName },
+                { $set: { [`releases.${dateString}`]: { hidden:isHidden } } }
+            );
+        }
+
+        // Return the updated paper info
+        const updatedPaper = await collection.findOne({ nameLowerCase: paperName });
+        res.status(200).json(updatedPaper);
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
+
+
+
+
+
 
 
 
@@ -321,7 +381,6 @@ router.patch("/:paperName/:date/:status", async (req, res) => {
 // Delete Paper by Id
 router.delete("/:id", async (req, res) => {
     try {
-
         const query = { _id: new ObjectId(req.params.id) }
 
         const collection = await db.collection("papers")

@@ -18,7 +18,6 @@ export function DatePicker(props: { date: Date, setNewDate: (newDate: Date) => v
     const setNewDate = props.setNewDate
     const navigate = useNavigate()
 
-
     const handleUpdateDate = (newDate: Date | undefined) => {
         const formatted = getDateFormatted(newDate)
         if (newDate) {
@@ -28,22 +27,20 @@ export function DatePicker(props: { date: Date, setNewDate: (newDate: Date) => v
     }
 
     return (
-
-
         <Popover>
             <PopoverTrigger asChild>
                 <Button
                     variant={"outline"}
                     className={cn(
                         "text-center font-normal",
-                        !date && "text-muted-foreground", 
+                        !date && "text-muted-foreground",
                     )}
                 >
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {date ? `${getDayFromIndex((date.getDay() + 6) % 7)} ${date.getDate()}.${date.getMonth()+1}.${date.getFullYear()}` : <span>Velg en dato</span>}
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className=" w-auto p-2">
+            <PopoverContent className="w-auto p-2">
                 <Calendar
                     mode="single"
                     selected={date}
