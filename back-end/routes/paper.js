@@ -312,7 +312,7 @@ router.patch("/:paperName/:date/:status", async (req, res) => {
 
 
 // Update "hidden" status
-router.patch("/:paperName/:date/:isHidden", async (req, res) => {
+router.patch("/setHiddenStatus/:paperName/:date/:isHidden", async (req, res) => {
     try {
         const paperName = req.params.paperName;
         const dateString = req.params.date;
