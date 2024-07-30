@@ -49,7 +49,7 @@ export default function AddPaperDialog({ getPapers, paper }: AddPaperDialogProps
 
     const URL = "https://api.markusevanger.no/polaris/papers";
     const handleSubmit = async () => {
-        const avis = { name: paperName, pattern: weekdays, info: info, deadline:deadline, defaultPages: defaultPages }; // Removed deadline from the request body
+        const avis = { name: paperName, pattern: weekdays, info: info, deadline: deadline, defaultPages: defaultPages }; // Removed deadline from the request body
         const method = paper ? "PATCH" : "POST";
         const endpoint = paper ? `${URL}/${paper._id}` : URL;
 
@@ -78,7 +78,7 @@ export default function AddPaperDialog({ getPapers, paper }: AddPaperDialogProps
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => setOpen(open)}>
-            <DialogTrigger className={buttonVariants({ variant: "outline", size: "icon"})}>
+            <DialogTrigger className={buttonVariants({ variant: "outline", size: "icon" })}>
                 {paper ? <Settings className="" /> : <CirclePlus className="" />}
             </DialogTrigger>
             <DialogContent>

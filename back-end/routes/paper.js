@@ -181,8 +181,6 @@ router.get("/:paperName/:date", async (req, res) => {
 
 
 
-
-
 // Get all data for single paper
 router.get("/:nameLowerCase", async (req, res) => {
     let collection = await db.collection("papers")
@@ -252,9 +250,10 @@ router.patch("/:id", async (req, res) => {
         const updates = {
             $set: {
                 name: req.body.name,
+                nameLowerCase: createLinkFriendlyName(req.body.name),
                 pattern: req.body.pattern,
                 info: req.body.info,
-                defaultPages: req.body.pages,
+                defaultPages: req.body.defaultPages,
                 deadline: req.body.deadline
             }
         }

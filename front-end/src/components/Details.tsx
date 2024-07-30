@@ -43,7 +43,8 @@ export default function Details() {
         releases: {},
         deadline: "",
         info: "",
-        pattern: []
+        pattern: [],
+        defaultPages: ""
     });
 
 
