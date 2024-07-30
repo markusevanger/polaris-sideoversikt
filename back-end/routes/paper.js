@@ -384,7 +384,7 @@ router.patch("/:paperName/:date/update", async (req, res) => {
                 }
             } else if (pageCount < currentPageCount) {
                 // Remove excess pages
-                for (let i = currentPageCount; i > pageCount; i--) {
+                for (let i = currentPageCount; i >= pageCount; i--) {
                     delete releases[dateString].pages[i];
                 }
             }
