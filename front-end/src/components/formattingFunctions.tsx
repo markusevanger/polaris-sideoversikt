@@ -58,6 +58,6 @@ export const getDateFormatted = (date: Date | undefined) => {
 export const amountOfPapers = (status:"notStarted" | "inProduction" | "done", paperData:Paper[], dateFormatted:string) => {
     return paperData.filter((paper: Paper) => {
         const release = paper.releases[dateFormatted];
-        return release && release.productionStatus === status;
+        return release && release.productionStatus === status && !release.hidden;
     }).length;
 }

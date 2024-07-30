@@ -21,11 +21,12 @@ import { getDayFromIndex } from "./formattingFunctions"
 
 
 
-export default function AddPaperDialog(props : {getPapers:any}) {
+export default function AddPaperDialog(props: { getPapers: any }) {
     const [paperName, setPaperName] = useState("")
     const [info, setInfo] = useState("")
     const [deadline, setDeadline] = useState("15:30")
     const [isOpen, setOpen] = useState(false)
+    const [pages, setPages] = useState("24")
 
     const [weekdays, setWeekdays] = useState<number[]>([]);
 
@@ -74,35 +75,42 @@ export default function AddPaperDialog(props : {getPapers:any}) {
                     <DialogDescription>Her legger du inn nye aviser</DialogDescription>
                     <div className="flex flex-col p-2 gap-3 mt">
 
-                        <div className="flex flex-col gap-1 border rounded-md p-2 bg-slate-200">
+                        <div className="flex flex-col gap-1 border rounded-md p-2">
                             <Label>Avis navn</Label>
                             <Input placeholder="Agderposten" value={paperName} onChange={(e) => { setPaperName(e.target.value) }}></Input>
                         </div>
 
                         <div className="grid grid-cols-2 gap-3">
 
-                            <div className="flex flex-col gap-1 border rounded-md p-2 bg-slate-200">
-                                <Label>Hvilke dager går avisen ut?</Label>
-                                {
+                            <div className="flex flex-col gap-3">
+                                <div className="flex flex-col gap-1 border rounded-md p-2">
+                                    <Label>Hvilke dager går avisen ut?</Label>
+                                    {
 
-                                    Array.from({ length: 7 }, (_, index) => index).map((_, index: number) => {
-                                        return (
-                                            <div key={index} className="w-full justify-start p-1">
-                                                <Checkbox id={index.toString()} onCheckedChange={(value: boolean) => handleCheckWeekday(value, index)} /> {getDayFromIndex(index)}
-                                            </div>
-                                        )
-                                    })
-                                }
+                                        Array.from({ length: 7 }, (_, index) => index).map((_, index: number) => {
+                                            return (
+                                                <div key={index} className="w-full justify-start p-1">
+                                                    <Checkbox id={index.toString()} onCheckedChange={(value: boolean) => handleCheckWeekday(value, index)} /> {getDayFromIndex(index)}
+                                                </div>
+                                            )
+                                        })
+                                    }
 
 
+                                </div>
+
+                                <div className="border p-2 rounded-md">
+                                    <Label>Hvor mange sider er avisen som regel?</Label>
+                                    <Input value={pages} onChange={(e) => {setPages(e.target.value)}} type="number"></Input>
+                                </div>
                             </div>
 
                             <div className="grid gap-3 grid-rows-3">
-                                <div className="border rounded-md p-2 bg-slate-200">
+                                <div className="border rounded-md p-2">
                                     <Label>Hva er deadline?</Label>
                                     <Input value={deadline} onChange={(e) => { setDeadline(e.target.value) }}></Input>
                                 </div>
-                                <div className="border rounded-md p-2 row-span-2 bg-slate-200 flex gap-2 flex-col">
+                                <div className="border rounded-md p-2 row-span-2 flex gap-2 flex-col">
                                     <Label>Beskrivelse og info</Label>
                                     <div className="h-full">
                                         <Textarea className=" min-h-full text-sm" value={info} onChange={(e) => { setInfo(e.target.value) }} placeholder="Deadline er 15:00 på fredager ..." />
