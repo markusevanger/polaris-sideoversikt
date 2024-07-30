@@ -8,7 +8,7 @@ import {
     getDateFormatted,
     getDayFromIndex,
     getMonthFromIndex,
-    statusEmoji,
+    getPaperStatus,
 } from "./formattingFunctions";
 import {
     Card,
@@ -18,7 +18,7 @@ import {
     CardTitle,
 } from "./ui/card";
 import RadialChart from "./RadialChart";
-import { Paper, ProductionStatus } from "./Paper";
+import { PageStatus, Paper } from "./Paper";
 import { Skeleton } from "./ui/skeleton";
 import { BigNumberCard } from "./BigNumberCard";
 import {
@@ -74,7 +74,7 @@ export default function Dashboard() {
         fetchPapers();
     }, [date]);
 
-    const statusOrder: { [key in ProductionStatus]: number } = {
+    const statusOrder: { [key in PageStatus]: number } = {
         notStarted: 0,
         inProduction: 1,
         done: 2,
@@ -210,21 +210,21 @@ export default function Dashboard() {
                                 {papers.length === 0 ? (
                                     <p className="text-xs text-mono">Ingen aviser hentet</p>
                                 ) : (
-                                    papers
-                                        .sort((a: Paper, b: Paper) => {
-                                            const currentDate = getDateFormatted(date);
-                                            const releaseA = a.releases ? a.releases[currentDate] : undefined;
-                                            const releaseB = b.releases ? b.releases[currentDate] : undefined;
+                                    papers.sort((a: Paper, b: Paper) => {
+                                        const currentDate = getDateFormatted(date);
 
-                                            if (!releaseA || !releaseB) {
-                                                return releaseA ? -1 : 1;
-                                            }
+                                        // Get the status of each paper using the new format
+                                        const statusA = getPaperStatus(a, currentDate);
+                                        const statusB = getPaperStatus(b, currentDate);
 
-                                            const statusA = releaseA.productionStatus;
-                                            const statusB = releaseB.productionStatus;
+                                        // Handle cases where one or both statuses might be null
+                                        if (statusA === null && statusB === null) return 0;
+                                        if (statusA === null) return 1;
+                                        if (statusB === null) return -1;
 
-                                            return statusOrder[statusA] - statusOrder[statusB];
-                                        })
+                                        // Compare statuses based on their defined order
+                                        return (statusOrder[statusA] ?? -1) - (statusOrder[statusB] ?? -1);
+                                    })
                                         .map((paper: Paper, index: number) => {
                                             const release = paper.releases ? paper.releases[getDateFormatted(date)] : undefined;
 
@@ -235,7 +235,7 @@ export default function Dashboard() {
                                             return (
                                                 <div key={index} className="flex justify-between mb-1 border items-center rounded-md p-2">
                                                     <Link className="w-full justify-start flex items-center gap-2" to={`/${paper.nameLowerCase}/${getDateFormatted(date)}`}>
-                                                        {release ? statusEmoji(release.productionStatus) : '❓'} {paper.name}
+                                                        {paper.name}
                                                     </Link>
                                                     <div className="flex gap-1">
                                                         <Button variant={"outline"} size={"icon"} onClick={() => { handleSetHidden(!release?.hidden, paper.nameLowerCase, getDateFormatted(date)) }}>

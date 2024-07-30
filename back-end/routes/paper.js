@@ -230,7 +230,7 @@ router.post("/", async (req, res) => {
         res.status(201).send(result)
 
 
-        
+
     } catch (err) {
         console.error(err)
         res.status(500).send("Error adding paper")
@@ -317,6 +317,77 @@ router.patch("/:paperName/:date", async (req, res) => {
             }
 
             releases[dateString].pages[page] = status;
+        }
+
+        // Update the paper in the database
+        await collection.updateOne(
+            { _id: new ObjectId(paper._id) },
+            { $set: { [`releases.${dateString}`]: releases[dateString] } }
+        );
+
+        // Return the updated paper info
+        const updatedPaper = await collection.findOne({ _id: new ObjectId(paper._id) });
+        res.status(200).json(updatedPaper);
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
+
+
+router.patch("/:paperName/:date/update", async (req, res) => {
+    try {
+        const paperName = req.params.paperName;
+        const dateString = req.params.date;
+        const date = new Date(dateString);
+        const { status, pageCount } = req.body;
+
+        // Check for valid date format
+        if (isNaN(date.getTime())) {
+            return res.status(400).send("Invalid date format " + dateString + " expected YYYY-MM-DD");
+        }
+
+        const collection = db.collection("papers");
+
+        // Find the paper by name
+        const paper = await collection.findOne({ nameLowerCase: paperName.toLowerCase() });
+
+        if (!paper) {
+            return res.status(404).send("Paper not found");
+        }
+
+        // Ensure the releases object exists and has an entry for the date
+        const releases = paper.releases || {};
+        if (!releases[dateString]) {
+            releases[dateString] = { hidden: false, pages: {} };
+        }
+
+        // Update all pages to the new status if provided
+        if (status) {
+            if (!allowedStatuses.includes(status)) {
+                return res.status(400).send("Invalid status. Allowed values are: " + allowedStatuses.join(", "));
+            }
+            for (let page in releases[dateString].pages) {
+                releases[dateString].pages[page] = status;
+            }
+        }
+
+        // Add or remove pages based on pageCount
+        if (pageCount !== undefined) {
+            const currentPageCount = Object.keys(releases[dateString].pages).length;
+            if (pageCount > currentPageCount) {
+                // Add new pages
+                for (let i = currentPageCount + 1; i <= pageCount; i++) {
+                    releases[dateString].pages[i] = status || "notStarted";
+                }
+            } else if (pageCount < currentPageCount) {
+                // Remove excess pages
+                for (let i = currentPageCount; i > pageCount; i--) {
+                    delete releases[dateString].pages[i];
+                }
+            }
         }
 
         // Update the paper in the database

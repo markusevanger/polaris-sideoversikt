@@ -55,22 +55,29 @@ export const getDateFormatted = (date: Date | undefined) => {
 
 
 
+// Function to determine the status of a single newspaper
+export const getPaperStatus = (paper: Paper, dateFormatted: string): PageStatus | null => {
+    const release = paper.releases[dateFormatted];
+    if (!release || release.hidden) return null;
+
+    const pages = release.pages || {};
+    const pageStatuses = Object.values(pages);
+
+    if (pageStatuses.every(pageStatus => pageStatus === "done")) {
+        return "done";
+    } else if (pageStatuses.some(pageStatus => pageStatus === "inProduction")) {
+        return "inProduction";
+    } else if (pageStatuses.every(pageStatus => pageStatus === "notStarted")) {
+        return "notStarted";
+    }
+
+    return null;
+};
+
+// Function to count the number of papers in each status
 export const amountOfPapers = (status: PageStatus, paperData: Paper[], dateFormatted: string): number => {
     return paperData.filter((paper: Paper) => {
-        const release = paper.releases[dateFormatted];
-        if (!release || release.hidden) return false;
-
-        const pages = release.pages || {};
-        const pageStatuses = Object.values(pages);
-
-        if (status === "done") {
-            return pageStatuses.every(pageStatus => pageStatus === "done");
-        } else if (status === "inProduction") {
-            return pageStatuses.some(pageStatus => pageStatus === "inProduction");
-        } else if (status === "notStarted") {
-            return pageStatuses.every(pageStatus => pageStatus === "notStarted");
-        }
-
-        return false;
+        const paperStatus = getPaperStatus(paper, dateFormatted);
+        return paperStatus === status;
     }).length;
-}
+};

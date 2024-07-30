@@ -8,6 +8,7 @@ import { getMonthFromIndex, iconStyle, statusEmoji } from "./formattingFunctions
 import {
     Card,
     CardContent,
+    CardHeader,
     CardTitle,
 } from "@/components/ui/card";
 
@@ -21,16 +22,9 @@ import {
 
 import { Badge } from "./ui/badge";
 import { DeleteDialog } from "./DeleteDialog";
+import { PageStatus, Paper } from "./Paper";
+import { ScrollArea } from "@radix-ui/react-scroll-area";
 
-interface Paper {
-    _id: string;
-    name: string;
-    nameLowerCase: string;
-    releases: { [key: string]: any };
-    deadline: string;
-    info: string;
-    productionStatus?: string;
-}
 
 export default function Details() {
     const URL = "https://api.markusevanger.no/polaris/";
@@ -71,15 +65,8 @@ export default function Details() {
                 const paperData = await response.json();
                 console.log(paperData);
 
-                updatePaperState({
-                    _id: paperData._id,
-                    name: paperData.name,
-                    nameLowerCase: paperData.nameLowerCase,
-                    info: paperData.info,
-                    deadline: paperData.deadline,
-                    releases: paperData.releases[date] || {},
-                });
-                console.log(`Hentet avis: ${paper.name}`);
+                updatePaperState(paperData);
+                console.log(`Hentet avis: ${paperData.name}`);
             } catch (error) {
                 console.error("Error fetching paper data:", error);
             }
@@ -88,29 +75,34 @@ export default function Details() {
         getGeneralPaperInfo();
     }, [name, date]);
 
-    const updateProductionStatus = async (newStatus: "notStarted" | "inProduction" | "done") => {
+    const updatePageStatus = async (pageNumber: number, newStatus: PageStatus, isHidden?: boolean) => {
+        if (!date || !name) return;
+
         try {
-            const response = await fetch(`${URL}papers/${name}/${date}/${newStatus}`, {
+            const response = await fetch(`${URL}papers/${name}/${date}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
                 },
+                body: JSON.stringify({
+                    status: newStatus,
+                    page: pageNumber,
+                    isHidden: isHidden
+                }),
             });
 
             if (response.ok) {
-                const data = await response.json();
-                console.log(`Production status updated successfully: ${JSON.stringify(data)}`);
-                updatePaperState({ productionStatus: newStatus });
+                const updatedPaper: Paper = await response.json();
+                setPaper(updatedPaper);
+                console.log(`Page status updated successfully for page ${pageNumber}`);
             } else {
                 const error = await response.text();
-                console.log(`Error updating production status: ${error}`);
+                console.log(`Error updating page status: ${error}`);
             }
         } catch (error) {
-            console.log(`Error updating production status: ${error}`);
+            console.log(`Error updating page status: ${error}`);
         }
     };
-
-    const statusText = paper.releases?.productionStatus ? getStatusText(paper.releases.productionStatus) : "";
 
     return paper ? (
         <>
@@ -142,20 +134,7 @@ export default function Details() {
                             <CardTitle className="text-sm">Status</CardTitle>
                             <CardContent className="h-full">
                                 <div className="flex h-full justify-center items-center">
-                                    <Select
-                                        onValueChange={(value: "notStarted" | "inProduction" | "done") => {
-                                            updateProductionStatus(value);
-                                        }}
-                                    >
-                                        <SelectTrigger className="w-[180px]">
-                                            <SelectValue placeholder={` ${statusEmoji(paper.releases?.productionStatus)} ${statusText} `} />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="notStarted">🔴 Ikke Begynt</SelectItem>
-                                            <SelectItem value="inProduction">🟠 I Produksjon</SelectItem>
-                                            <SelectItem value="done">🟢 Ferdig</SelectItem>
-                                        </SelectContent>
-                                    </Select>
+
                                 </div>
                             </CardContent>
                         </Card>
@@ -168,7 +147,39 @@ export default function Details() {
                         </Card>
 
                         <Card className="col-span-4 row-span-3">
-                            <div className="h-full w-full flex justify-center items-center">🚧🏗️</div>
+                            <CardHeader><CardTitle>Sider</CardTitle></CardHeader>
+                            <ScrollArea className="gap-4 p-3 grid grid-cols-2 h-full">
+
+
+                                {paper.releases[date!!] ? (
+                                    Object.entries(paper.releases[date!!].pages).map(([pageNumber, status]) => (
+                                        <div
+                                            key={pageNumber}
+                                            className={`w-full border rounded-sm p-3 flex justify-between items-center`}
+                                        >
+                                            <span className="font-mono font-bold">{parseInt(pageNumber) + 1}</span>
+                                            <Select
+                                                value={status}
+                                                onValueChange={(value: PageStatus) => updatePageStatus(parseInt(pageNumber), value)}
+                                            >
+                                                <SelectTrigger className="w-fit">
+                                                    <SelectValue placeholder={statusEmoji(status)} />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="notStarted">🔴</SelectItem>
+                                                    <SelectItem value="inProduction">🟠</SelectItem>
+                                                    <SelectItem value="done">🟢</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    ))
+
+                                ) : (
+                                    <div>No pages available for this date.</div>
+                                )}
+
+
+                            </ScrollArea>
                         </Card>
                     </div>
                 </div>
@@ -179,7 +190,7 @@ export default function Details() {
     );
 }
 
-function getStatusText(status: string): string {
+function getStatusText(status: PageStatus): string {
     if (status === "notStarted") return "Ikke begynt";
     else if (status === "inProduction") return "I produksjon";
     else if (status === "done") return "Ferdig";
