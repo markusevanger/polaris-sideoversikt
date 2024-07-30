@@ -147,7 +147,7 @@ export default function Details() {
 
     return paper ? (
         <>
-            <div className="w-full flex justify-center ">
+            <div className="w-full flex justify-center mb-10">
                 <div className="h-screen w-full p-5 flex flex-col gap-5 max-w-[1500px]">
 
 
@@ -197,7 +197,7 @@ export default function Details() {
                                     <Info ></Info>
                                     Info
                                 </CardTitle>
-                                <CardContent className="text-xs">{paper.info || "Ingen info oppgitt."}</CardContent>
+                                <CardContent className="">{paper.info || "Ingen info oppgitt."}</CardContent>
                             </Card>
 
 
@@ -281,9 +281,11 @@ export default function Details() {
     );
 }
 
+
+/*
 function getStatusText(status: PageStatus): string {
     if (status === "notStarted") return "Ikke begynt";
     else if (status === "inProduction") return "I produksjon";
     else if (status === "done") return "Ferdig";
     else return status;
-}
+}*/

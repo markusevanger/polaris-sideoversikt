@@ -49,6 +49,12 @@ export default function AddPaperDialog({ getPapers, paper }: AddPaperDialogProps
 
     const URL = "https://api.markusevanger.no/polaris/papers";
     const handleSubmit = async () => {
+
+
+        if (!(weekdays.length > 0)){
+            return
+        }
+
         const avis = { name: paperName, pattern: weekdays, info: info, deadline: deadline, defaultPages: defaultPages }; // Removed deadline from the request body
         const method = paper ? "PATCH" : "POST";
         const endpoint = paper ? `${URL}/${paper._id}` : URL;

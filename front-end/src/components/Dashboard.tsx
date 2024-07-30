@@ -20,7 +20,6 @@ import {
 } from "./ui/card";
 import RadialChart from "./RadialChart";
 import { PageStatus, Paper } from "./Paper";
-import { Skeleton } from "./ui/skeleton";
 import { BigNumberCard } from "./BigNumberCard";
 import {
     Newspaper,
@@ -95,11 +94,11 @@ export default function Dashboard() {
                 },
                 body: JSON.stringify({ isHidden })
             });
-    
+
             if (!response.ok) {
                 throw new Error(`Error updating hidden status: ${response.statusText}`);
             }
-    
+
             const updatedPaper = await response.json();
             setPapers((prevPapers) =>
                 prevPapers.map((paper) =>
@@ -111,7 +110,7 @@ export default function Dashboard() {
             console.error("Failed to update hidden status", error);
         }
     };
-    
+
     return (
         <div className="w-full h-screen flex justify-center">
             <div className="w-full mt-3 max-w-[1000px] h-screen flex flex-col p-5 gap-3 items-center">
@@ -165,16 +164,11 @@ export default function Dashboard() {
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="flex-1">
-                                {papers.length > 0 ? (
-                                    <RadialChart
-                                        notStarted={amountOfPapers("notStarted", papers, getDateFormatted(date!!))}
-                                        inProduction={amountOfPapers("inProduction", papers, getDateFormatted(date!!))}
-                                        done={amountOfPapers("done", papers, getDateFormatted(date!!))}
-
-                                    />
-                                ) : (
-                                    <Skeleton className="w-full h-full rounded-lg p-5" />
-                                )}
+                                <RadialChart
+                                    notStarted={amountOfPapers("notStarted", papers, getDateFormatted(date!!))}
+                                    inProduction={amountOfPapers("inProduction", papers, getDateFormatted(date!!))}
+                                    done={amountOfPapers("done", papers, getDateFormatted(date!!))}
+                                />
                             </CardContent>
                         </Card>
                         <div className="grid gap-3 row-start-1 grid-cols-3">
@@ -239,10 +233,10 @@ export default function Dashboard() {
                                                             {getDonePercentage(paper, dateStr!!).toFixed()} %
                                                         </Badge>
 
-                                                    <Link className="w-full justify-start flex items-center gap-2" to={`/${paper.nameLowerCase}/${getDateFormatted(date)}`}>
-                                                        {paper.name}
-                                                    </Link>
-                                                        
+                                                        <Link className="w-full justify-start flex items-center gap-2" to={`/${paper.nameLowerCase}/${getDateFormatted(date)}`}>
+                                                            {paper.name}
+                                                        </Link>
+
                                                     </div>
 
                                                     <div className="flex gap-1">
