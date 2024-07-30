@@ -379,7 +379,7 @@ router.patch("/:paperName/:date/update", async (req, res) => {
             const currentPageCount = Object.keys(releases[dateString].pages).length;
             if (pageCount > currentPageCount) {
                 // Add new pages
-                for (let i = currentPageCount + 1; i <= pageCount; i++) {
+                for (let i = currentPageCount + 1; i < pageCount; i++) {
                     releases[dateString].pages[i] = status || "notStarted";
                 }
             } else if (pageCount < currentPageCount) {

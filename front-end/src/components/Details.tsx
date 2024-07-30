@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { buttonVariants } from "./ui/button";
+import { Button, buttonVariants } from "./ui/button";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, Info } from "lucide-react";
-import { getMonthFromIndex, iconStyle, statusEmoji } from "./formattingFunctions";
+import { getMonthFromIndex, getPaperStatus, iconStyle, statusEmoji } from "./formattingFunctions";
 
 import {
     Card,
@@ -24,6 +24,8 @@ import { Badge } from "./ui/badge";
 import { DeleteDialog } from "./DeleteDialog";
 import { PageStatus, Paper } from "./Paper";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
 
 
 export default function Details() {
@@ -41,6 +43,9 @@ export default function Details() {
         deadline: "",
         info: "",
     });
+
+
+    const [pageAmount, setPageAmount] = useState(0)
 
     const dateObj = new Date(date!!);
 
@@ -66,6 +71,7 @@ export default function Details() {
                 console.log(paperData);
 
                 updatePaperState(paperData);
+                setPageAmount(Object.keys(paperData.releases[date!!].pages).length)
                 console.log(`Hentet avis: ${paperData.name}`);
             } catch (error) {
                 console.error("Error fetching paper data:", error);
@@ -101,6 +107,38 @@ export default function Details() {
             }
         } catch (error) {
             console.log(`Error updating page status: ${error}`);
+        }
+    };
+
+
+    const updatePaperDetails = async (options: { status?: PageStatus; pageCount?: number }) => {
+        if (!date || !name) return;
+    
+        try {
+            const response = await fetch(`${URL}papers/${name}/${date}/update`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(options),
+            });
+    
+            if (response.ok) {
+                const updatedPaper: Paper = await response.json();
+                setPaper(updatedPaper);
+                
+                if (options.status) {
+                    console.log(`All pages status updated successfully to ${options.status}`);
+                }
+                if (options.pageCount !== undefined) {
+                    console.log(`Page count updated to ${options.pageCount}`);
+                }
+            } else {
+                const error = await response.text();
+                console.log(`Error updating paper details: ${error}`);
+            }
+        } catch (error) {
+            console.log(`Error updating paper details: ${error}`);
         }
     };
 
@@ -147,7 +185,42 @@ export default function Details() {
                         </Card>
 
                         <Card className="col-span-4 row-span-3">
-                            <CardHeader><CardTitle>Sider</CardTitle></CardHeader>
+                            <CardHeader className="">
+                                <div className="flex justify-between">
+                                    <CardTitle>Sider</CardTitle>
+                                    <div className="flex flex-col">
+                                        <div className="flex items-center gap-2">
+                                            <p className="font-mono">Endre status for hele avis: </p>
+                                            <Select
+                                                value={getPaperStatus(paper, date!!)!!}
+                                                onValueChange={(value: PageStatus) => updatePaperDetails({status: value})}
+                                            >
+                                                <SelectTrigger className="w-fit">
+                                                    <SelectValue placeholder={statusEmoji(getPaperStatus(paper, date!!)!!)} />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="notStarted">Ikke startet 🔴</SelectItem>
+                                                    <SelectItem value="inProduction"> I Produksjon 🟠</SelectItem>
+                                                    <SelectItem value="done">Ferdig 🟢</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+
+                                        <div>
+                                            <Label>Sidetall: </Label>
+                                            <div className="flex gap-1">
+                                                <Input type="number" value={pageAmount} onChange={(value) => setPageAmount(parseInt(value.target.value))}></Input>
+                                                <Button onClick={() => updatePaperDetails({pageCount:pageAmount})}>Oppdater sidetall</Button>
+                                            </div>
+
+
+                                        </div>
+                                    </div>
+
+
+                                </div>
+
+                            </CardHeader>
                             <ScrollArea className="gap-4 p-3 grid grid-cols-2 h-full">
 
 
@@ -157,7 +230,7 @@ export default function Details() {
                                             key={pageNumber}
                                             className={`w-full border rounded-sm p-3 flex justify-between items-center`}
                                         >
-                                            <span className="font-mono font-bold">{parseInt(pageNumber) + 1}</span>
+                                            <span className="font-mono font-bold">{parseInt(pageNumber)+1}</span>
                                             <Select
                                                 value={status}
                                                 onValueChange={(value: PageStatus) => updatePageStatus(parseInt(pageNumber), value)}
