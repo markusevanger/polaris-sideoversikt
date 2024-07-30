@@ -166,8 +166,8 @@ export default function Details() {
                                     <p className="text- text-foreground">Trykkfrist: {paper.deadline}</p>
                                 </div>
                             </div>
-                            <div className="">
-                                <AddPaperDialog paper={paper}></AddPaperDialog>
+                            <div className="flex gap-1">
+                                <AddPaperDialog paper={paper} ></AddPaperDialog>
                                 <DeleteDialog paper={paper}></DeleteDialog>
                             </div>
                         </div>

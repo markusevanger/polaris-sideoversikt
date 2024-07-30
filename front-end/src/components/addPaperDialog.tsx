@@ -28,7 +28,7 @@ export default function AddPaperDialog({ getPapers, paper }: AddPaperDialogProps
     const [info, setInfo] = useState(paper ? paper.info : "");
     const [deadline, setDeadline] = useState(paper ? paper.deadline : "15:30");
     const [isOpen, setOpen] = useState(false);
-    const [pages, setPages] = useState(paper ? Object.keys(paper.releases).length.toString() : "24");
+    const [defaultPages, setDefaultPages] = useState(paper ? paper.defaultPages : "24");
     const [weekdays, setWeekdays] = useState<number[]>(paper && paper.pattern ? paper.pattern : []);
 
     useEffect(() => {
@@ -36,7 +36,7 @@ export default function AddPaperDialog({ getPapers, paper }: AddPaperDialogProps
             setPaperName(paper.name);
             setInfo(paper.info);
             setDeadline(paper.deadline);
-            setPages(Object.keys(paper.releases).length.toString());
+            setDefaultPages(paper.defaultPages);
             setWeekdays(paper.pattern);
         }
     }, [paper]);
@@ -49,7 +49,7 @@ export default function AddPaperDialog({ getPapers, paper }: AddPaperDialogProps
 
     const URL = "https://api.markusevanger.no/polaris/papers";
     const handleSubmit = async () => {
-        const avis = { name: paperName, pattern: weekdays, info: info, pages: pages }; // Removed deadline from the request body
+        const avis = { name: paperName, pattern: weekdays, info: info, deadline:deadline, defaultPages: defaultPages }; // Removed deadline from the request body
         const method = paper ? "PATCH" : "POST";
         const endpoint = paper ? `${URL}/${paper._id}` : URL;
 
@@ -78,8 +78,8 @@ export default function AddPaperDialog({ getPapers, paper }: AddPaperDialogProps
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => setOpen(open)}>
-            <DialogTrigger className={buttonVariants({ variant: "outline" })}>
-                {paper ? <Settings className="w-4" /> : <CirclePlus className="w-4" />}
+            <DialogTrigger className={buttonVariants({ variant: "outline", size: "icon"})}>
+                {paper ? <Settings className="" /> : <CirclePlus className="" />}
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
@@ -109,7 +109,7 @@ export default function AddPaperDialog({ getPapers, paper }: AddPaperDialogProps
 
                                 <div className="border p-2 rounded-md">
                                     <Label>Hvor mange sider er avisen som regel?</Label>
-                                    <Input value={pages} onChange={(e) => setPages(e.target.value)} type="number" />
+                                    <Input value={defaultPages} onChange={(e) => setDefaultPages(e.target.value)} type="number" />
                                 </div>
                             </div>
 

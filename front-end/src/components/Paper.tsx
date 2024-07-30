@@ -13,4 +13,5 @@ export interface Paper {
     info: string;
     pattern:number[]
     releases: { [date: string]: Release };
+    defaultPages:string
 }

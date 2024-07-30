@@ -213,7 +213,7 @@ function createLinkFriendlyName(name) {
 router.post("/", async (req, res) => {
     try {
 
-        if (!req.body.name || !req.body.pattern || !req.body.deadline || !req.body.pages) {
+        if (!req.body.name || !req.body.pattern || !req.body.deadline || !req.body.defaultPages || !req.body.info) {
             return res.status(400).send("Missing required fields");
         }
 
@@ -223,7 +223,7 @@ router.post("/", async (req, res) => {
             pattern: req.body.pattern,
             info: req.body.info,
             deadline: req.body.deadline,
-            defaultPages: req.body.pages
+            defaultPages: req.body.defaultPages
         }
         let collection = await db.collection("papers")
         let result = await collection.insertOne(newPaper)
