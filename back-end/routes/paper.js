@@ -127,18 +127,25 @@ router.get("/:paperName/:date", async (req, res) => {
         const releases = paper.releases || {};
         const filteredReleases = {};
 
-        if (releases[dateString]) {
-            filteredReleases[dateString] = releases[dateString];
-        } else {
-            // Add the date with "notStarted" status if it doesn't exist
-            filteredReleases[dateString] = { productionStatus: "notStarted" };
-
-            // Update the paper in the database
-            await collection.updateOne(
-                { nameLowerCase: paperName },
-                { $set: { [`releases.${dateString}`]: { productionStatus: "notStarted", hidden:false } } }
-            );
+        // Initialize the release object for the specified date if it doesn't exist
+        if (!releases[dateString]) {
+            releases[dateString] = { hidden: false, pages: {} };
         }
+
+        // Ensure there are entries for each page (assuming 24 pages)
+        for (let page = 0; page < 24; page++) {
+            if (!releases[dateString].pages[page]) {
+                releases[dateString].pages[page] = "notStarted";
+            }
+        }
+
+        filteredReleases[dateString] = releases[dateString];
+
+        // Update the paper in the database
+        await collection.updateOne(
+            { nameLowerCase: paperName },
+            { $set: { [`releases.${dateString}`]: releases[dateString] } }
+        );
 
         // Return the paper info with the filtered releases
         res.status(200).json({
@@ -151,6 +158,7 @@ router.get("/:paperName/:date", async (req, res) => {
         res.status(500).send("Internal Server Error");
     }
 });
+
 
 
 

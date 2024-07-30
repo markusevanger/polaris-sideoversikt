@@ -53,7 +53,6 @@ export default function Dashboard() {
     const [lastUpdated, setLastUpdated] = useState<Date | undefined>(undefined);
     const [showHiddenPapers, setShowHiddenPapers] = useState(false);
 
-
     async function fetchPapers() {
         try {
             const response = await fetch(`${URL}/${getDateFormatted(date)}`);
@@ -214,8 +213,8 @@ export default function Dashboard() {
                                     papers
                                         .sort((a: Paper, b: Paper) => {
                                             const currentDate = getDateFormatted(date);
-                                            const releaseA = a.releases[currentDate];
-                                            const releaseB = b.releases[currentDate];
+                                            const releaseA = a.releases ? a.releases[currentDate] : undefined;
+                                            const releaseB = b.releases ? b.releases[currentDate] : undefined;
 
                                             if (!releaseA || !releaseB) {
                                                 return releaseA ? -1 : 1;
@@ -227,9 +226,9 @@ export default function Dashboard() {
                                             return statusOrder[statusA] - statusOrder[statusB];
                                         })
                                         .map((paper: Paper, index: number) => {
-                                            const release = paper.releases[getDateFormatted(date)];
+                                            const release = paper.releases ? paper.releases[getDateFormatted(date)] : undefined;
 
-                                            if (!showHiddenPapers && release.hidden) { // Stop from displaying hidden papers.
+                                            if (!showHiddenPapers && release && release.hidden) { // Stop from displaying hidden papers.
                                                 return null;
                                             }
 
@@ -239,8 +238,8 @@ export default function Dashboard() {
                                                         {release ? statusEmoji(release.productionStatus) : '❓'} {paper.name}
                                                     </Link>
                                                     <div className="flex gap-1">
-                                                        <Button variant={"outline"} size={"icon"} onClick={() => { handleSetHidden(!release.hidden, paper.nameLowerCase, getDateFormatted(date)) }}>
-                                                            {release.hidden ? <EyeOff /> : <Eye />}
+                                                        <Button variant={"outline"} size={"icon"} onClick={() => { handleSetHidden(!release?.hidden, paper.nameLowerCase, getDateFormatted(date)) }}>
+                                                            {release?.hidden ? <EyeOff /> : <Eye />}
                                                         </Button>
                                                         <Badge variant={"secondary"}>
                                                             <p className="font-mono text-xs text-muted-foreground">{paper.deadline}</p>
