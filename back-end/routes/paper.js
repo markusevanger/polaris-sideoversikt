@@ -47,7 +47,6 @@ router.get("/", async (req, res) => {
 
 
 
-
 router.get("/:date", async (req, res) => {
     try {
         const dateString = req.params.date;
@@ -76,9 +75,27 @@ router.get("/:date", async (req, res) => {
             // Check if the requested date exists in releases
             if (!paper.releases[dateString]) {
                 // Add the requested date with default status if it doesn't exist
-                paper.releases[dateString] = { productionStatus: "notStarted", hidden:false };
+                paper.releases[dateString] = { hidden: false, pages: {} };
+
+                // Initialize pages with default status
+                for (let page = 0; page < 24; page++) {
+                    paper.releases[dateString].pages[page] = "notStarted";
+                }
 
                 // Update the paper in the database
+                await collection.updateOne(
+                    { _id: paper._id }, // Use _id to ensure the correct document is updated
+                    { $set: { releases: paper.releases } }
+                );
+            } else {
+                // Ensure all 24 pages exist in the releases for the requested date
+                for (let page = 0; page < paper.defaultPages; page++) {
+                    if (!paper.releases[dateString].pages[page]) {
+                        paper.releases[dateString].pages[page] = "notStarted";
+                    }
+                }
+
+                // Update the paper in the database if any pages were added
                 await collection.updateOne(
                     { _id: paper._id }, // Use _id to ensure the correct document is updated
                     { $set: { releases: paper.releases } }
