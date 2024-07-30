@@ -1,9 +1,9 @@
 import { PageStatus, Paper } from "./Paper"
 
-export function statusEmoji(productionStatus: string) {
-    if (productionStatus == "notStarted") return "🔴"
-    else if (productionStatus == "inProduction") return "🟠"
-    else if (productionStatus == "done") return "🟢"
+export function statusEmoji(productionStatus: PageStatus) {
+    if (productionStatus == "notStarted") return <div className="rounded-full w-4 h-4 bg-[#ef4444]"></div>
+    else if (productionStatus == "inProduction") return <div className="rounded-full w-4 h-4 bg-[#fbbf24]"></div>
+    else if (productionStatus == "done") return <div className="rounded-full w-4 h-4 bg-[#84cc16]"></div>
     else return ""
 }
 
@@ -115,3 +115,11 @@ export const getDonePercentage = (paper: Paper, dateFormatted: string): number =
 
     return donePercentage;
 };
+
+
+export function getStatusText(status: PageStatus): string {
+    if (status === "notStarted") return "Ikke begynt";
+    else if (status === "inProduction") return "I produksjon";
+    else if (status === "done") return "Ferdig";
+    else return status;
+}

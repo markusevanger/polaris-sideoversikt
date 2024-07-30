@@ -147,8 +147,8 @@ export default function Details() {
 
     return paper ? (
         <>
-            <div className="w-full flex justify-center mb-10">
-                <div className="h-screen w-full p-5 flex flex-col gap-5 max-w-[1500px]">
+            <div className="w-full flex justify-center ">
+                <div className="w-full p-5 flex flex-col gap-5 max-w-[1500px]">
 
 
 
@@ -176,7 +176,7 @@ export default function Details() {
 
 
 
-                    <div className="grid grid-cols-8 grid-rows-8 h-full gap-4">
+                    <div className="grid grid-cols-8  h-full gap-4">
                         <Card className="h-full p-3 lg:col-span-4 col-span-full row-span-2">
                             <CardTitle className="flex gap-2"> <PieChart></PieChart> Status</CardTitle>
                             <CardContent className="h-full">
@@ -211,9 +211,9 @@ export default function Details() {
                                         <SelectValue placeholder={statusEmoji(getPaperStatus(paper, date!!)!!)} />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="notStarted">🔴 Ikke startet</SelectItem>
-                                        <SelectItem value="inProduction">🟠 I Produksjon</SelectItem>
-                                        <SelectItem value="done">🟢 Ferdig</SelectItem>
+                                        <SelectItem value="notStarted"><div className="flex gap-1 items-center">{statusEmoji("notStarted")} Ikke startet</div></SelectItem>
+                                        <SelectItem value="inProduction"><div className="flex gap-1 items-center">{statusEmoji("inProduction")} I Produksjon</div></SelectItem>
+                                        <SelectItem value="done"><div className="flex gap-1 items-center">{statusEmoji("done")} Ferdig</div> </SelectItem>
                                     </SelectContent>
                                 </Select>
                             </Card>
@@ -259,9 +259,9 @@ export default function Details() {
                                                     <SelectValue placeholder={statusEmoji(status)} />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="notStarted">🔴</SelectItem>
-                                                    <SelectItem value="inProduction">🟠</SelectItem>
-                                                    <SelectItem value="done">🟢</SelectItem>
+                                                    <SelectItem value="notStarted"><div className="flex gap-1 items-center">{statusEmoji("notStarted")} Ikke startet</div></SelectItem>
+                                                    <SelectItem value="inProduction"><div className="flex gap-1 items-center">{statusEmoji("inProduction")} I Produksjon</div></SelectItem>
+                                                    <SelectItem value="done"><div className="flex gap-1 items-center">{statusEmoji("done")} Ferdig</div> </SelectItem>
                                                 </SelectContent>
                                             </Select>
                                         </div>
@@ -273,19 +273,18 @@ export default function Details() {
                             </div>
                         </Card>
                     </div>
+                    <div className="w-full flex justify-center">
+                        <Badge variant={"secondary"} className="w-fit">
+                            Du har nådd bunnen :)
+                        </Badge>
+                    </div>
+
+
                 </div>
+
             </div >
         </>
     ) : (
         "Laster"
     );
 }
-
-
-/*
-function getStatusText(status: PageStatus): string {
-    if (status === "notStarted") return "Ikke begynt";
-    else if (status === "inProduction") return "I produksjon";
-    else if (status === "done") return "Ferdig";
-    else return status;
-}*/

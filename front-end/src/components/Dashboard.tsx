@@ -112,8 +112,8 @@ export default function Dashboard() {
     };
 
     return (
-        <div className="w-full h-screen flex justify-center">
-            <div className="w-full mt-3 max-w-[1000px] h-screen flex flex-col p-5 gap-3 items-center">
+        <div className="w-full  flex justify-center">
+            <div className="w-full mt-3 max-w-[1000px] flex flex-col p-5 gap-3 items-center">
                 <div className="w-full">
                     <div className="flex gap-3">
                         <h1 className="text-lg font-bold flex gap-2 p-0 m-0">
@@ -174,15 +174,15 @@ export default function Dashboard() {
                         <div className="grid gap-3 row-start-1 grid-cols-3">
                             <BigNumberCard
                                 number={amountOfPapers("done", papers, getDateFormatted(date))}
-                                title="🟢 Ferdig"
+                                title="done"
                             ></BigNumberCard>
                             <BigNumberCard
                                 number={amountOfPapers("inProduction", papers, getDateFormatted(date))}
-                                title="🟠 I Produksjon"
+                                title="inProduction"
                             ></BigNumberCard>
                             <BigNumberCard
                                 number={amountOfPapers("notStarted", papers, getDateFormatted(date))}
-                                title="🔴 Ikke startet"
+                                title="notStarted"
                             ></BigNumberCard>
                         </div>
                     </div>
@@ -233,7 +233,7 @@ export default function Dashboard() {
                                                             {getDonePercentage(paper, dateStr!!).toFixed()} %
                                                         </Badge>
 
-                                                        <Link className="w-full justify-start flex items-center gap-2" to={`/${paper.nameLowerCase}/${getDateFormatted(date)}`}>
+                                                        <Link className="w-full justify-start flex items-center gap-2 text-nowrap" to={`/${paper.nameLowerCase}/${getDateFormatted(date)}`}>
                                                             {paper.name}
                                                         </Link>
 

@@ -1,18 +1,20 @@
+import { getStatusText, statusEmoji } from "./formattingFunctions"
+import { PageStatus } from "./Paper"
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
 
 
 
 
-export function BigNumberCard(props: {number:number, title:string} ){
+export function BigNumberCard(props: {number:number, title:PageStatus} ){
     const number = props.number
-    const title = props.title
+    const title = getStatusText(props.title)
 
 
     return (
         <Card>
             <CardHeader>
-                <CardTitle className="text-md text-muted-foreground">
-                    {title}
+                <CardTitle className=" flex gap-1 items-center text-md text-muted-foreground">
+                    {statusEmoji(props.title)}{title}
                 </CardTitle>
             </CardHeader>
             <CardContent>
