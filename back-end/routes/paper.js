@@ -276,75 +276,13 @@ router.patch("/:id", async (req, res) => {
 
 // Define the allowed status values
 const allowedStatuses = ["notStarted", "inProduction", "done"];
-router.patch("/:paperName/:date/:status", async (req, res) => {
+
+router.patch("/:paperName/:date", async (req, res) => {
     try {
         const paperName = req.params.paperName;
         const dateString = req.params.date;
-        const newStatus = req.params.status;
         const date = new Date(dateString);
-
-        // Check for valid date format
-        if (isNaN(date.getTime())) {
-            return res.status(400).send("Invalid date format " + dateString + " expected /YYYY-MM-DD");
-        }
-
-        // Validate status
-        if (!allowedStatuses.includes(newStatus)) {
-            return res.status(400).send("Invalid status. Allowed values are: " + allowedStatuses.join(", "));
-        }
-
-        const collection = db.collection("papers");
-
-        // Find the paper by name
-        const paper = await collection.findOne({ nameLowerCase: paperName });
-
-        if (!paper) {
-            return res.status(404).send("Paper not found");
-        }
-
-        // Ensure the releases object exists and has an entry for the date
-        const releases = paper.releases || {};
-        if (!releases[dateString]) {
-            releases[dateString] = { productionStatus: newStatus };
-
-            // Update the paper in the database
-            await collection.updateOne(
-                { nameLowerCase: paperName },
-                { $set: { [`releases.${dateString}`]: { productionStatus: newStatus } } }
-            );
-        } else {
-            // Update the production status if the date exists
-            await collection.updateOne(
-                { nameLowerCase: paperName },
-                { $set: { [`releases.${dateString}.productionStatus`]: newStatus } }
-            );
-        }
-
-        // Return the updated paper info
-        const updatedPaper = await collection.findOne({ nameLowerCase: paperName });
-        res.status(200).json(updatedPaper);
-
-    } catch (err) {
-        console.error(err);
-        res.status(500).send("Internal Server Error");
-    }
-});
-
-
-
-
-//todo make date content array to hold multiple info dumps :)
- // this also changes logic on front end .
-
-
-
-// Update "hidden" status
-router.patch("/setHiddenStatus/:paperName/:date/:isHidden", async (req, res) => {
-    try {
-        const paperName = req.params.paperName;
-        const dateString = req.params.date;
-        const isHidden = req.params.isHidden === 'true'; // Ensure isHidden is a boolean
-        const date = new Date(dateString);
+        const { status, page, isHidden } = req.body;
 
         // Check for valid date format
         if (isNaN(date.getTime())) {
@@ -360,16 +298,35 @@ router.patch("/setHiddenStatus/:paperName/:date/:isHidden", async (req, res) => 
             return res.status(404).send("Paper not found");
         }
 
-        // Update the hidden status without overwriting other fields for the given date
-        const updateField = `releases.${dateString}.hidden`;
+        // Ensure the releases object exists and has an entry for the date
+        const releases = paper.releases || {};
+        if (!releases[dateString]) {
+            releases[dateString] = { hidden: false, pages: {} };
+        }
 
+        // Update the hidden status if provided
+        if (typeof isHidden === 'boolean') {
+            releases[dateString].hidden = isHidden;
+        }
+
+        // Validate and update the page status if provided
+        if (status && page !== undefined) {
+            // Validate status
+            if (!allowedStatuses.includes(status)) {
+                return res.status(400).send("Invalid status. Allowed values are: " + allowedStatuses.join(", "));
+            }
+
+            releases[dateString].pages[page] = status;
+        }
+
+        // Update the paper in the database
         await collection.updateOne(
-            { nameLowerCase: paperName.toLowerCase() },
-            { $set: { [updateField]: isHidden } }
+            { _id: new ObjectId(paper._id) },
+            { $set: { [`releases.${dateString}`]: releases[dateString] } }
         );
 
         // Return the updated paper info
-        const updatedPaper = await collection.findOne({ nameLowerCase: paperName.toLowerCase() });
+        const updatedPaper = await collection.findOne({ _id: new ObjectId(paper._id) });
         res.status(200).json(updatedPaper);
 
     } catch (err) {
@@ -378,8 +335,7 @@ router.patch("/setHiddenStatus/:paperName/:date/:isHidden", async (req, res) => 
     }
 });
 
-
-
+module.exports = router;
 
 
 

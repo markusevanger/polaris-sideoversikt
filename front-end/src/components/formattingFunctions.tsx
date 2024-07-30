@@ -1,4 +1,4 @@
-import { Paper } from "./Paper"
+import { PageStatus, Paper } from "./Paper"
 
 export function statusEmoji(productionStatus: string) {
     if (productionStatus == "notStarted") return "🔴"
@@ -55,9 +55,22 @@ export const getDateFormatted = (date: Date | undefined) => {
 
 
 
-export const amountOfPapers = (status:"notStarted" | "inProduction" | "done", paperData:Paper[], dateFormatted:string) => {
+export const amountOfPapers = (status: PageStatus, paperData: Paper[], dateFormatted: string): number => {
     return paperData.filter((paper: Paper) => {
         const release = paper.releases[dateFormatted];
-        return release && release.productionStatus === status && !release.hidden;
+        if (!release || release.hidden) return false;
+
+        const pages = release.pages || {};
+        const pageStatuses = Object.values(pages);
+
+        if (status === "done") {
+            return pageStatuses.every(pageStatus => pageStatus === "done");
+        } else if (status === "inProduction") {
+            return pageStatuses.some(pageStatus => pageStatus === "inProduction");
+        } else if (status === "notStarted") {
+            return pageStatuses.every(pageStatus => pageStatus === "notStarted");
+        }
+
+        return false;
     }).length;
 }
