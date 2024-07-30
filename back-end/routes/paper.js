@@ -78,7 +78,7 @@ router.get("/:date", async (req, res) => {
                 paper.releases[dateString] = { hidden: false, pages: {} };
 
                 // Initialize pages with default status
-                for (let page = 0; page < 24; page++) {
+                for (let page = 0; page < paper.defaultPages; page++) {
                     paper.releases[dateString].pages[page] = "notStarted";
                 }
 
@@ -88,7 +88,6 @@ router.get("/:date", async (req, res) => {
                     { $set: { releases: paper.releases } }
                 );
             } else {
-                // Ensure all 24 pages exist in the releases for the requested date
                 for (let page = 0; page < paper.defaultPages; page++) {
                     if (!paper.releases[dateString].pages[page]) {
                         paper.releases[dateString].pages[page] = "notStarted";
@@ -148,7 +147,7 @@ router.get("/:paperName/:date", async (req, res) => {
         if (!releases[dateString]) {
             releases[dateString] = { hidden: false, pages: {} };
 
-            for (let page = 0; page < 24; page++) {
+            for (let page = 0; page < paper.defaultPages; page++) {
                 releases[dateString].pages[page] = "notStarted";
 
             }
