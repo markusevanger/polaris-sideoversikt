@@ -59,28 +59,28 @@ export default function Details() {
         }));
     };
 
-    useEffect(() => {
-        async function getGeneralPaperInfo() {
-            if (!name || !date) return;
 
-            try {
-                const response = await fetch(`${URL}papers/${name}/${date}`);
-                if (!response.ok) {
-                    const message = `Error occurred: ${response.statusText}`;
-                    console.error(message);
-                    return;
-                }
-                const paperData = await response.json();
-                console.log(paperData);
+    async function getGeneralPaperInfo(){
+        if (!name || !date) return;
 
-                updatePaperState(paperData);
-                setPageAmount(Object.keys(paperData.releases[date!!].pages).length)
-                console.log(`Hentet avis: ${paperData.name}`);
-            } catch (error) {
-                console.error("Error fetching paper data:", error);
+        try {
+            const response = await fetch(`${URL}papers/${name}/${date}`);
+            if (!response.ok) {
+                const message = `Error occurred: ${response.statusText}`;
+                console.error(message);
+                return;
             }
-        }
+            const paperData = await response.json();
+            console.log(paperData);
 
+            updatePaperState(paperData);
+            setPageAmount(Object.keys(paperData.releases[date!!].pages).length)
+            console.log(`Hentet avis: ${paperData.name}`);
+        } catch (error) {
+            console.error("Error fetching paper data:", error);
+        }
+    }
+    useEffect(() => {
         getGeneralPaperInfo();
     }, [name, date]);
 
@@ -168,7 +168,7 @@ export default function Details() {
                                 </div>
                             </div>
                             <div className="flex gap-1">
-                                <AddPaperDialog paper={paper} ></AddPaperDialog>
+                                <AddPaperDialog paper={paper} getPapers={getGeneralPaperInfo} ></AddPaperDialog>
                                 <DeleteDialog paper={paper}></DeleteDialog>
                             </div>
                         </div>
@@ -243,7 +243,7 @@ export default function Details() {
                                 <CardTitle className="flex gap-2"><Files />Sider</CardTitle>
                             </CardHeader>
 
-                            <div className="grid grid-cols-2 gap-2 p-3">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 p-3">
                                 {paper.releases[date!!] ? (
                                     Object.entries(paper.releases[date!!].pages).map(([pageNumber, status]) => (
                                         <div

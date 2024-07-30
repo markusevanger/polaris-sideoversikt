@@ -229,11 +229,11 @@ export default function Dashboard() {
                                                 <div key={index} className="flex justify-between mb-1 border items-center rounded-md p-2">
                                                     <div className="flex gap-2">
 
-                                                        <Badge className="w-full">
+                                                        <Badge className="w-fit text-nowrap ">
                                                             {getDonePercentage(paper, dateStr!!).toFixed()} %
                                                         </Badge>
 
-                                                        <Link className="w-full justify-start flex items-center gap-2 text-nowrap" to={`/${paper.nameLowerCase}/${getDateFormatted(date)}`}>
+                                                        <Link className="w-full justify-start flex items-center gap-2 text-nowrap overflow-scroll" to={`/${paper.nameLowerCase}/${getDateFormatted(date)}`}>
                                                             {paper.name}
                                                         </Link>
 

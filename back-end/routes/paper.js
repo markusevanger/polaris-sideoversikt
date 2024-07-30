@@ -211,7 +211,7 @@ function createLinkFriendlyName(name) {
 router.post("/", async (req, res) => {
     try {
 
-        if (!req.body.name || !req.body.pattern || !req.body.deadline || !req.body.defaultPages || !req.body.info) {
+        if (!req.body.name || !req.body.pattern || !req.body.deadline || !req.body.defaultPages) {
             return res.status(400).send("Missing required fields");
         }
 
