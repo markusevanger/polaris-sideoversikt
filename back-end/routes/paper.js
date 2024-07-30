@@ -130,14 +130,14 @@ router.get("/:paperName/:date", async (req, res) => {
         // Initialize the release object for the specified date if it doesn't exist
         if (!releases[dateString]) {
             releases[dateString] = { hidden: false, pages: {} };
-        }
 
-        // Ensure there are entries for each page (assuming 24 pages)
-        for (let page = 0; page < 24; page++) {
-            if (!releases[dateString].pages[page]) {
+            for (let page = 0; page < 24; page++) {
                 releases[dateString].pages[page] = "notStarted";
+
             }
         }
+
+
 
         filteredReleases[dateString] = releases[dateString];
 
