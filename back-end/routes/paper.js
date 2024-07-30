@@ -252,7 +252,10 @@ router.patch("/:id", async (req, res) => {
         const updates = {
             $set: {
                 name: req.body.name,
-                pattern: req.body.pattern
+                pattern: req.body.pattern,
+                info: req.body.info,
+                defaultPages: req.body.pages,
+                deadline: req.body.deadline
             }
         }
         let collection = await db.collection("papers")

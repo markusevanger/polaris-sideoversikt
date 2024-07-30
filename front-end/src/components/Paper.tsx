@@ -11,5 +11,6 @@ export interface Paper {
     nameLowerCase: string;
     deadline: string;
     info: string;
+    pattern:number[]
     releases: { [date: string]: Release };
 }

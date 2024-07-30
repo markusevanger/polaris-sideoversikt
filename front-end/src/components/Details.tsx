@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Button, buttonVariants } from "./ui/button";
 import { cn } from "@/lib/utils";
-import { ChevronLeft, Info } from "lucide-react";
-import { getMonthFromIndex, getPaperStatus, iconStyle, statusEmoji } from "./formattingFunctions";
+import { Check, ChevronLeft, Files, Info, PieChart } from "lucide-react";
+import { countPagesWithStatus, getMonthFromIndex, getPaperStatus, statusEmoji } from "./formattingFunctions";
 
 import {
     Card,
@@ -23,9 +23,10 @@ import {
 import { Badge } from "./ui/badge";
 import { DeleteDialog } from "./DeleteDialog";
 import { PageStatus, Paper } from "./Paper";
-import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+import RadialChart from "./RadialChart";
+import AddPaperDialog from "./addPaperDialog";
 
 
 export default function Details() {
@@ -42,6 +43,7 @@ export default function Details() {
         releases: {},
         deadline: "",
         info: "",
+        pattern: []
     });
 
 
@@ -113,7 +115,7 @@ export default function Details() {
 
     const updatePaperDetails = async (options: { status?: PageStatus; pageCount?: number }) => {
         if (!date || !name) return;
-    
+
         try {
             const response = await fetch(`${URL}papers/${name}/${date}/update`, {
                 method: "PATCH",
@@ -122,11 +124,11 @@ export default function Details() {
                 },
                 body: JSON.stringify(options),
             });
-    
+
             if (response.ok) {
                 const updatedPaper: Paper = await response.json();
                 setPaper(updatedPaper);
-                
+
                 if (options.status) {
                     console.log(`All pages status updated successfully to ${options.status}`);
                 }
@@ -146,6 +148,9 @@ export default function Details() {
         <>
             <div className="w-full flex justify-center ">
                 <div className="h-screen w-full p-5 flex flex-col gap-5 max-w-[1500px]">
+
+
+
                     <div className="flex flex-col gap-2 ">
                         <div className="flex justify-between">
                             <Link to={`/${date}`} className={cn(buttonVariants({ variant: "outline" }), "max-w-40")}>
@@ -162,75 +167,89 @@ export default function Details() {
                                 </div>
                             </div>
                             <div className="">
+                                <AddPaperDialog paper={paper}></AddPaperDialog>
                                 <DeleteDialog paper={paper}></DeleteDialog>
                             </div>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-4 grid-rows-4 h-full gap-4">
-                        <Card className="h-full p-3 col-span-2">
-                            <CardTitle className="text-sm">Status</CardTitle>
-                            <CardContent className="h-full">
-                                <div className="flex h-full justify-center items-center">
 
-                                </div>
+
+                    <div className="grid grid-cols-8 grid-rows-8 h-full gap-4">
+                        <Card className="h-full p-3 lg:col-span-4 col-span-full row-span-2">
+                            <CardTitle className="flex gap-2"> <PieChart></PieChart> Status</CardTitle>
+                            <CardContent className="h-full">
+
+                                <RadialChart
+                                    notStarted={countPagesWithStatus(paper, date!!, "notStarted")}
+                                    inProduction={countPagesWithStatus(paper, date!!, "inProduction")}
+                                    done={countPagesWithStatus(paper, date!!, "done")}
+                                >
+                                </RadialChart>
+
                             </CardContent>
                         </Card>
 
-                        <Card className="h-full p-3 col-span-2">
-                            <CardTitle className="flex w-full">
-                                <Info className={iconStyle}></Info>
-                            </CardTitle>
-                            <CardContent className="text-xs">{paper.info || "Ingen info oppgitt."}</CardContent>
-                        </Card>
-
-                        <Card className="col-span-4 row-span-3">
-                            <CardHeader className="">
-                                <div className="flex justify-between">
-                                    <CardTitle>Sider</CardTitle>
-                                    <div className="flex flex-col">
-                                        <div className="flex items-center gap-2">
-                                            <p className="font-mono">Endre status for hele avis: </p>
-                                            <Select
-                                                value={getPaperStatus(paper, date!!)!!}
-                                                onValueChange={(value: PageStatus) => updatePaperDetails({status: value})}
-                                            >
-                                                <SelectTrigger className="w-fit">
-                                                    <SelectValue placeholder={statusEmoji(getPaperStatus(paper, date!!)!!)} />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="notStarted">Ikke startet 🔴</SelectItem>
-                                                    <SelectItem value="inProduction"> I Produksjon 🟠</SelectItem>
-                                                    <SelectItem value="done">Ferdig 🟢</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-
-                                        <div>
-                                            <Label>Sidetall: </Label>
-                                            <div className="flex gap-1">
-                                                <Input type="number" value={pageAmount} onChange={(value) => setPageAmount(parseInt(value.target.value))}></Input>
-                                                <Button onClick={() => updatePaperDetails({pageCount:pageAmount})}>Oppdater sidetall</Button>
-                                            </div>
+                        <div className="h-full lg:col-span-4 row-span-2 grid grid-cols-2 grid-rows-3 gap-3 col-span-full">
+                            <Card className="p-3 row-span-2 col-span-2">
+                                <CardTitle className="flex gap-2">
+                                    <Info ></Info>
+                                    Info
+                                </CardTitle>
+                                <CardContent className="text-xs">{paper.info || "Ingen info oppgitt."}</CardContent>
+                            </Card>
 
 
+                            <Card className="p-3">
+                                <Label>Endre status for hele avis:</Label>
+                                <Select
+                                    value={getPaperStatus(paper, date!!)!!}
+                                    onValueChange={(value: PageStatus) => updatePaperDetails({ status: value })}
+                                >
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder={statusEmoji(getPaperStatus(paper, date!!)!!)} />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="notStarted">🔴 Ikke startet</SelectItem>
+                                        <SelectItem value="inProduction">🟠 I Produksjon</SelectItem>
+                                        <SelectItem value="done">🟢 Ferdig</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </Card>
+
+
+                            <Card className="p-3">
+                                <div className="flex flex-col">
+                                    <div>
+                                        <Label>Sidetall: </Label>
+                                        <div className="flex gap-1">
+                                            <Input type="number" value={pageAmount} onChange={(value) => setPageAmount(parseInt(value.target.value))}></Input>
+                                            <Button size={"icon"} variant={"secondary"} onClick={() => updatePaperDetails({ pageCount: pageAmount })}><Check></Check></Button>
                                         </div>
                                     </div>
-
-
                                 </div>
+                            </Card>
+                        </div>
 
+
+
+
+
+
+
+                        <Card className="col-span-8 h-fit mb-4">
+                            <CardHeader className="">
+                                <CardTitle className="flex gap-2"><Files />Sider</CardTitle>
                             </CardHeader>
-                            <ScrollArea className="gap-4 p-3 grid grid-cols-2 h-full">
 
-
+                            <div className="grid grid-cols-2 gap-2 p-3">
                                 {paper.releases[date!!] ? (
                                     Object.entries(paper.releases[date!!].pages).map(([pageNumber, status]) => (
                                         <div
                                             key={pageNumber}
                                             className={`w-full border rounded-sm p-3 flex justify-between items-center`}
                                         >
-                                            <span className="font-mono font-bold">{parseInt(pageNumber)+1}</span>
+                                            <span className="font-mono font-bold">{parseInt(pageNumber) + 1}</span>
                                             <Select
                                                 value={status}
                                                 onValueChange={(value: PageStatus) => updatePageStatus(parseInt(pageNumber), value)}
@@ -250,13 +269,11 @@ export default function Details() {
                                 ) : (
                                     <div>No pages available for this date.</div>
                                 )}
-
-
-                            </ScrollArea>
+                            </div>
                         </Card>
                     </div>
                 </div>
-            </div>
+            </div >
         </>
     ) : (
         "Laster"

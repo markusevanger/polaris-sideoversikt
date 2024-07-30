@@ -1,4 +1,3 @@
-
 import {
     Dialog,
     DialogClose,
@@ -13,22 +12,34 @@ import { Button, buttonVariants } from "./ui/button"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "./ui/checkbox"
-import { CirclePlus } from "lucide-react"
-import { useState } from "react"
+import { CirclePlus, Settings } from "lucide-react"
+import { useState, useEffect } from "react"
 import { Textarea } from "./ui/textarea"
 import { getDayFromIndex } from "./formattingFunctions"
+import { Paper } from "./Paper"
 
+interface AddPaperDialogProps {
+    getPapers?: () => void;
+    paper?: Paper;
+}
 
+export default function AddPaperDialog({ getPapers, paper }: AddPaperDialogProps) {
+    const [paperName, setPaperName] = useState(paper ? paper.name : "");
+    const [info, setInfo] = useState(paper ? paper.info : "");
+    const [deadline, setDeadline] = useState(paper ? paper.deadline : "15:30");
+    const [isOpen, setOpen] = useState(false);
+    const [pages, setPages] = useState(paper ? Object.keys(paper.releases).length.toString() : "24");
+    const [weekdays, setWeekdays] = useState<number[]>(paper && paper.pattern ? paper.pattern : []);
 
-
-export default function AddPaperDialog(props: { getPapers: any }) {
-    const [paperName, setPaperName] = useState("")
-    const [info, setInfo] = useState("")
-    const [deadline, setDeadline] = useState("15:30")
-    const [isOpen, setOpen] = useState(false)
-    const [pages, setPages] = useState("24")
-
-    const [weekdays, setWeekdays] = useState<number[]>([]);
+    useEffect(() => {
+        if (paper) {
+            setPaperName(paper.name);
+            setInfo(paper.info);
+            setDeadline(paper.deadline);
+            setPages(Object.keys(paper.releases).length.toString());
+            setWeekdays(paper.pattern);
+        }
+    }, [paper]);
 
     const handleCheckWeekday = (checked: boolean, day: number) => {
         setWeekdays((prevWeekdays) =>
@@ -36,94 +47,90 @@ export default function AddPaperDialog(props: { getPapers: any }) {
         );
     };
 
-
-    const URL = "https://api.markusevanger.no/polaris/papers"
+    const URL = "https://api.markusevanger.no/polaris/papers";
     const handleSubmit = async () => {
-        const avis = { name: paperName, pattern: weekdays, info: info, deadline: deadline, pages:pages}
+        const avis = { name: paperName, pattern: weekdays, info: info, pages: pages }; // Removed deadline from the request body
+        const method = paper ? "PATCH" : "POST";
+        const endpoint = paper ? `${URL}/${paper._id}` : URL;
+
         try {
-            const response = await fetch(URL, {
-                method: "POST",
+            const response = await fetch(endpoint, {
+                method: method,
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify(avis)
-            })
+                body: JSON.stringify(avis),
+            });
 
             if (!response.ok) {
-                //throw new Error(`HTTP Error! Status ${response.status}`)
+                throw new Error(`HTTP Error! Status ${response.status}`);
             }
 
-            console.log(response.status + ": " + response.statusText)
-            props.getPapers()
-            setOpen(false)
-
-            // give feedback here
+            console.log(response.status + ": " + response.statusText);
+            if (getPapers) {
+                getPapers();
+            }
+            setOpen(false);
+        } catch (err) {
+            console.log("A problem occurred: " + err);
         }
-        catch (err) {
-            console.log("A problem occcured: " + err)
-        }
-    }
+    };
 
     return (
-        <Dialog open={isOpen} onOpenChange={(open) => { setOpen(open) }}>
+        <Dialog open={isOpen} onOpenChange={(open) => setOpen(open)}>
             <DialogTrigger className={buttonVariants({ variant: "outline" })}>
-                <CirclePlus className="w-4" />
+                {paper ? <Settings className="w-4" /> : <CirclePlus className="w-4" />}
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>📰 Legg til Avis</DialogTitle>
-                    <DialogDescription>Her legger du inn nye aviser</DialogDescription>
+                    <DialogTitle>📰 {paper ? "Rediger Avis" : "Legg til Avis"}</DialogTitle>
+                    <DialogDescription>{paper ? "Her redigerer du avisen" : "Her legger du inn nye aviser"}</DialogDescription>
                     <div className="flex flex-col p-2 gap-3 mt">
-
                         <div className="flex flex-col gap-1 border rounded-md p-2">
                             <Label>Avis navn</Label>
-                            <Input placeholder="Agderposten" value={paperName} onChange={(e) => { setPaperName(e.target.value) }}></Input>
+                            <Input placeholder="Agderposten" value={paperName} onChange={(e) => setPaperName(e.target.value)} />
                         </div>
 
                         <div className="grid grid-cols-2 gap-3">
-
                             <div className="flex flex-col gap-3">
                                 <div className="flex flex-col gap-1 border rounded-md p-2">
                                     <Label>Hvilke dager går avisen ut?</Label>
-                                    {
-
-                                        Array.from({ length: 7 }, (_, index) => index).map((_, index: number) => {
-                                            return (
-                                                <div key={index} className="w-full justify-start p-1">
-                                                    <Checkbox id={index.toString()} onCheckedChange={(value: boolean) => handleCheckWeekday(value, index)} /> {getDayFromIndex(index)}
-                                                </div>
-                                            )
-                                        })
-                                    }
-
-
+                                    {Array.from({ length: 7 }, (_, index) => (
+                                        <div key={index} className="w-full justify-start p-1">
+                                            <Checkbox
+                                                id={index.toString()}
+                                                checked={weekdays.includes(index)}
+                                                onCheckedChange={(value: boolean) => handleCheckWeekday(value, index)}
+                                            />
+                                            {getDayFromIndex(index)}
+                                        </div>
+                                    ))}
                                 </div>
 
                                 <div className="border p-2 rounded-md">
                                     <Label>Hvor mange sider er avisen som regel?</Label>
-                                    <Input value={pages} onChange={(e) => {setPages(e.target.value)}} type="number"></Input>
+                                    <Input value={pages} onChange={(e) => setPages(e.target.value)} type="number" />
                                 </div>
                             </div>
 
                             <div className="grid gap-3 grid-rows-3">
                                 <div className="border rounded-md p-2">
                                     <Label>Hva er deadline?</Label>
-                                    <Input value={deadline} onChange={(e) => { setDeadline(e.target.value) }}></Input>
+                                    <Input value={deadline} onChange={(e) => setDeadline(e.target.value)} />
                                 </div>
                                 <div className="border rounded-md p-2 row-span-2 flex gap-2 flex-col">
                                     <Label>Beskrivelse og info</Label>
                                     <div className="h-full">
-                                        <Textarea className=" min-h-full text-sm" value={info} onChange={(e) => { setInfo(e.target.value) }} placeholder="Deadline er 15:00 på fredager ..." />
-
+                                        <Textarea
+                                            className="min-h-full text-sm"
+                                            value={info}
+                                            onChange={(e) => setInfo(e.target.value)}
+                                            placeholder="Deadline er 15:00 på fredager ..."
+                                        />
                                     </div>
                                 </div>
-
-
-
                             </div>
-
                         </div>
-
                     </div>
                     <DialogFooter className="p-2">
                         <div className="flex justify-between w-full">
@@ -132,12 +139,11 @@ export default function AddPaperDialog(props: { getPapers: any }) {
                                     Lukk
                                 </Button>
                             </DialogClose>
-                            <Button onClick={() => handleSubmit()}> Legg til</Button>
+                            <Button onClick={handleSubmit}>{paper ? "Oppdater" : "Legg til"}</Button>
                         </div>
                     </DialogFooter>
                 </DialogHeader>
             </DialogContent>
         </Dialog>
-    )
+    );
 }
-

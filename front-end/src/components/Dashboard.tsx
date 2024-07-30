@@ -7,6 +7,7 @@ import {
     amountOfPapers,
     getDateFormatted,
     getDayFromIndex,
+    getDonePercentage,
     getMonthFromIndex,
     getPaperStatus,
 } from "./formattingFunctions";
@@ -86,18 +87,19 @@ export default function Dashboard() {
         dateStr: string
     ) => {
         try {
-            const url = `${URL}/setHiddenStatus/${paperName}/${dateStr}/${isHidden}`;
+            const url = `${URL}/${paperName}/${dateStr}`;
             const response = await fetch(url, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
                 },
+                body: JSON.stringify({ isHidden })
             });
-
+    
             if (!response.ok) {
                 throw new Error(`Error updating hidden status: ${response.statusText}`);
             }
-
+    
             const updatedPaper = await response.json();
             setPapers((prevPapers) =>
                 prevPapers.map((paper) =>
@@ -109,7 +111,7 @@ export default function Dashboard() {
             console.error("Failed to update hidden status", error);
         }
     };
-
+    
     return (
         <div className="w-full h-screen flex justify-center">
             <div className="w-full mt-3 max-w-[1000px] h-screen flex flex-col p-5 gap-3 items-center">
@@ -126,16 +128,8 @@ export default function Dashboard() {
                     </div>
                 </div>
                 <div className="flex gap-1 justify-between w-full row-start-2">
-                    <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger>
-                                <DatePicker date={date} setNewDate={(newDate: Date) => setDate(newDate)} />
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>Endre dato for oversikt</p>
-                            </TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
+                    <DatePicker date={date} setNewDate={(newDate: Date) => setDate(newDate)} />
+
                     <div className="flex gap-1">
                         <TooltipProvider>
                             <Tooltip>
@@ -172,7 +166,12 @@ export default function Dashboard() {
                             </CardHeader>
                             <CardContent className="flex-1">
                                 {papers.length > 0 ? (
-                                    <RadialChart date={date} dateStr={getDateFormatted(date)} paperData={papers} />
+                                    <RadialChart
+                                        notStarted={amountOfPapers("notStarted", papers, getDateFormatted(date!!))}
+                                        inProduction={amountOfPapers("inProduction", papers, getDateFormatted(date!!))}
+                                        done={amountOfPapers("done", papers, getDateFormatted(date!!))}
+
+                                    />
                                 ) : (
                                     <Skeleton className="w-full h-full rounded-lg p-5" />
                                 )}
@@ -234,14 +233,23 @@ export default function Dashboard() {
 
                                             return (
                                                 <div key={index} className="flex justify-between mb-1 border items-center rounded-md p-2">
+                                                    <div className="flex gap-2">
+
+                                                        <Badge className="w-full">
+                                                            {getDonePercentage(paper, dateStr!!).toFixed()} %
+                                                        </Badge>
+
                                                     <Link className="w-full justify-start flex items-center gap-2" to={`/${paper.nameLowerCase}/${getDateFormatted(date)}`}>
                                                         {paper.name}
                                                     </Link>
+                                                        
+                                                    </div>
+
                                                     <div className="flex gap-1">
                                                         <Button variant={"outline"} size={"icon"} onClick={() => { handleSetHidden(!release?.hidden, paper.nameLowerCase, getDateFormatted(date)) }}>
                                                             {release?.hidden ? <EyeOff /> : <Eye />}
                                                         </Button>
-                                                        <Badge variant={"secondary"}>
+                                                        <Badge variant={"secondary"} className="">
                                                             <p className="font-mono text-xs text-muted-foreground">{paper.deadline}</p>
                                                         </Badge>
                                                     </div>
