@@ -335,14 +335,6 @@ router.patch("/:paperName/:date", async (req, res) => {
     }
 });
 
-module.exports = router;
-
-
-
-
-
-
-
 
 
 
