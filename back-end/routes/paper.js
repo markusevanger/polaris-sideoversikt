@@ -24,10 +24,10 @@ Data should look like this:
 
 // Get all papers
 router.get("/", async (req, res) => {
-    let collection = await db.collection("papers")
+    let collection = await db.collection("papers");
     let results = await collection.find({}).toArray();
-    res.send(results).status(200);
-})
+    res.status(200).send(results);
+});
 
 router.get("/:date", async (req, res) => {
     try {
@@ -59,9 +59,9 @@ router.get("/:date", async (req, res) => {
                 // Add the requested date with default status if it doesn't exist
                 paper.releases[dateString] = { hidden: false, pages: {} };
 
-                // Initialize pages with default status
+                // Initialize pages with default status and empty text
                 for (let page = 0; page < paper.defaultPages; page++) {
-                    paper.releases[dateString].pages[page] = "notStarted";
+                    paper.releases[dateString].pages[page] = { productionStatus: "notStarted", text: "" };
                 }
 
                 // Update the paper in the database
@@ -72,7 +72,7 @@ router.get("/:date", async (req, res) => {
             } else {
                 for (let page = 0; page < paper.defaultPages; page++) {
                     if (!paper.releases[dateString].pages[page]) {
-                        paper.releases[dateString].pages[page] = "notStarted";
+                        paper.releases[dateString].pages[page] = { productionStatus: "notStarted", text: "" };
                     }
                 }
 
@@ -124,8 +124,7 @@ router.get("/:paperName/:date", async (req, res) => {
             releases[dateString] = { hidden: false, pages: {} };
 
             for (let page = 0; page < paper.defaultPages; page++) {
-                releases[dateString].pages[page] = "notStarted";
-
+                releases[dateString].pages[page] = { productionStatus: "notStarted", text: "" };
             }
         }
 
@@ -151,13 +150,13 @@ router.get("/:paperName/:date", async (req, res) => {
 
 // Get all data for single paper
 router.get("/:nameLowerCase", async (req, res) => {
-    let collection = await db.collection("papers")
-    let query = { nameLowerCase: req.params.nameLowerCase }
-    let result = await collection.findOne(query)
+    let collection = await db.collection("papers");
+    let query = { nameLowerCase: req.params.nameLowerCase };
+    let result = await collection.findOne(query);
 
-    if (!result) res.send("Not Found").status(404)
-    else res.send(result).status(200)
-})
+    if (!result) res.status(404).send("Not Found");
+    else res.status(200).send(result);
+});
 
 function createLinkFriendlyName(name) {
     return name.toLowerCase().replace(/\s+/g, '-');
@@ -166,7 +165,6 @@ function createLinkFriendlyName(name) {
 // Add new newspaper 
 router.post("/", async (req, res) => {
     try {
-
         if (!req.body.name || !req.body.pattern || !req.body.deadline || !req.body.defaultPages) {
             return res.status(400).send("Missing required fields");
         }
@@ -178,21 +176,21 @@ router.post("/", async (req, res) => {
             info: req.body.info,
             deadline: req.body.deadline,
             defaultPages: req.body.defaultPages
-        }
-        let collection = await db.collection("papers")
-        let result = await collection.insertOne(newPaper)
-        res.status(201).send(result)
+        };
+        let collection = await db.collection("papers");
+        let result = await collection.insertOne(newPaper);
+        res.status(201).send(result);
 
     } catch (err) {
-        console.error(err)
-        res.status(500).send("Error adding paper")
+        console.error(err);
+        res.status(500).send("Error adding paper");
     }
-})
+});
 
 // Update Paper by Id
 router.patch("/:id", async (req, res) => {
     try {
-        const query = { _id: new ObjectId(req.params.id) }
+        const query = { _id: new ObjectId(req.params.id) };
         const updates = {
             $set: {
                 name: req.body.name,
@@ -202,15 +200,15 @@ router.patch("/:id", async (req, res) => {
                 defaultPages: req.body.defaultPages,
                 deadline: req.body.deadline
             }
-        }
-        let collection = await db.collection("papers")
-        let result = await collection.updateOne(query, updates)
-        res.send(result).status(200)
+        };
+        let collection = await db.collection("papers");
+        let result = await collection.updateOne(query, updates);
+        res.status(200).send(result);
     } catch (err) {
-        console.error(err)
-        res.status(500).send("Error updating paper")
+        console.error(err);
+        res.status(500).send("Error updating paper");
     }
-})
+});
 
 // Define the allowed status values
 const allowedStatuses = ["notStarted", "readyForProduction", "inProduction", "productionDone", "done"];
@@ -220,7 +218,7 @@ router.patch("/:paperName/:date", async (req, res) => {
         const paperName = req.params.paperName;
         const dateString = req.params.date;
         const date = new Date(dateString);
-        const { status, page, isHidden } = req.body;
+        const { status, page, isHidden, text } = req.body;
 
         // Check for valid date format
         if (isNaN(date.getTime())) {
@@ -247,14 +245,16 @@ router.patch("/:paperName/:date", async (req, res) => {
             releases[dateString].hidden = isHidden;
         }
 
-        // Validate and update the page status if provided
-        if (status && page !== undefined) {
-            // Validate status
-            if (!allowedStatuses.includes(status)) {
+        // Validate and update the page status and text if provided
+        if (page !== undefined) {
+            if (status && !allowedStatuses.includes(status)) {
                 return res.status(400).send("Invalid status. Allowed values are: " + allowedStatuses.join(", "));
             }
 
-            releases[dateString].pages[page] = status;
+            releases[dateString].pages[page] = {
+                productionStatus: status || releases[dateString].pages[page].productionStatus,
+                text: text || releases[dateString].pages[page].text
+            };
         }
 
         // Update the paper in the database
@@ -278,7 +278,7 @@ router.patch("/:paperName/:date/update", async (req, res) => {
         const paperName = req.params.paperName;
         const dateString = req.params.date;
         const date = new Date(dateString);
-        const { status, pageCount } = req.body;
+        const { status, pageCount, text } = req.body;
 
         // Check for valid date format
         if (isNaN(date.getTime())) {
@@ -306,7 +306,14 @@ router.patch("/:paperName/:date/update", async (req, res) => {
                 return res.status(400).send("Invalid status. Allowed values are: " + allowedStatuses.join(", "));
             }
             for (let page in releases[dateString].pages) {
-                releases[dateString].pages[page] = status;
+                releases[dateString].pages[page].productionStatus = status;
+            }
+        }
+
+        // Update text for all pages if provided
+        if (text) {
+            for (let page in releases[dateString].pages) {
+                releases[dateString].pages[page].text = text;
             }
         }
 
@@ -315,12 +322,12 @@ router.patch("/:paperName/:date/update", async (req, res) => {
             const currentPageCount = Object.keys(releases[dateString].pages).length;
             if (pageCount > currentPageCount) {
                 // Add new pages
-                for (let i = currentPageCount + 1; i < pageCount; i++) {
-                    releases[dateString].pages[i] = status || "notStarted";
+                for (let i = currentPageCount; i < pageCount; i++) {
+                    releases[dateString].pages[i] = { productionStatus: status || "notStarted", text: text || "" };
                 }
             } else if (pageCount < currentPageCount) {
                 // Remove excess pages
-                for (let i = currentPageCount; i >= pageCount; i--) {
+                for (let i = currentPageCount - 1; i >= pageCount; i--) {
                     delete releases[dateString].pages[i];
                 }
             }
@@ -345,15 +352,15 @@ router.patch("/:paperName/:date/update", async (req, res) => {
 // Delete Paper by Id
 router.delete("/:id", async (req, res) => {
     try {
-        const query = { _id: new ObjectId(req.params.id) }
+        const query = { _id: new ObjectId(req.params.id) };
 
-        const collection = await db.collection("papers")
-        let result = await collection.deleteOne(query)
-        res.send(result).status(200)
+        const collection = await db.collection("papers");
+        let result = await collection.deleteOne(query);
+        res.status(200).send(result);
     } catch (err) {
-        console.error(err)
-        res.status(500).send(`Error deleting paper: ${err}`)
+        console.error(err);
+        res.status(500).send(`Error deleting paper: ${err}`);
     }
-})
+});
 
 export default router;
