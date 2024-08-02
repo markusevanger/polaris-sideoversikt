@@ -46,7 +46,7 @@ const URL = "https://api.markusevanger.no/polaris/papers";
 export default function Dashboard() {
     const params = useParams();
     const dateStr = params.date?.toString();
-    const initialDate = dateStr ? new Date(dateStr) : new Date();
+    const initialDate = dateStr ? new Date(dateStr) : new Date(Date.now() + 24 * 60 * 60 * 1000); // Get tomorow if nothing is specified. 
 
     const [papers, setPapers] = useState<Paper[]>([]);
     const [date, setDate] = useState<Date>(initialDate);
@@ -233,7 +233,7 @@ export default function Dashboard() {
                                                             {getDonePercentage(paper, dateStr!!).toFixed()} %
                                                         </Badge>
 
-                                                        <Link className="w-full justify-start flex items-center gap-2 text-nowrap overflow-scroll" to={`/${paper.nameLowerCase}/${getDateFormatted(date)}`}>
+                                                        <Link className="w-full justify-start flex items-center gap-2 text-nowrap overflow-hidden" to={`/${paper.nameLowerCase}/${getDateFormatted(date)}`}>
                                                             {paper.name}
                                                         </Link>
 
