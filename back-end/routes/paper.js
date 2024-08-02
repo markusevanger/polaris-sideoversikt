@@ -5,28 +5,61 @@ import { ObjectId } from "mongodb";
 const router = express.Router();
 
 /* 
-
 Data should look like this:
-    {
-        name: Agderposten,
-        releases: [
-            2024-07-23 : {
-                productionStatus: inProduction
-            },
-            2024-07-24 : {
-                productionStatus: notStarted
+{
+    name: "Agderposten",
+    nameLowerCase: "agderposten",
+    pattern: [1, 3, 5],  // Example pattern for publication days (Monday, Wednesday, Friday)
+    info: "Some information about the paper",
+    deadline: "12:00 PM",
+    defaultPages: 4,
+    releases: {
+        "2024-07-23": {
+            hidden: false,
+            xmlDone: false,
+            pages: {
+                "0": {
+                    productionStatus: "inProduction",
+                    text: "Content of page 0"
+                },
+                "1": {
+                    productionStatus: "notStarted",
+                    text: "Content of page 1"
+                },
+                "2": {
+                    productionStatus: "notStarted",
+                    text: "Content of page 2"
+                },
+                "3": {
+                    productionStatus: "notStarted",
+                    text: "Content of page 3"
+                }
             }
-        
-        ]
-    },
-
+        },
+        "2024-07-24": {
+            hidden: false,
+            xmlDone: false,
+            pages: {
+                "0": {
+                    productionStatus: "notStarted",
+                    text: ""
+                }
+            }
+        }
+    }
+}
 */
 
 // Get all papers
 router.get("/", async (req, res) => {
-    let collection = await db.collection("papers");
-    let results = await collection.find({}).toArray();
-    res.status(200).send(results);
+    try {
+        const collection = await db.collection("papers");
+        const results = await collection.find({}).toArray();
+        res.status(200).json(results);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Internal Server Error");
+    }
 });
 
 router.get("/:date", async (req, res) => {
@@ -57,7 +90,7 @@ router.get("/:date", async (req, res) => {
             // Check if the requested date exists in releases
             if (!paper.releases[dateString]) {
                 // Add the requested date with default status if it doesn't exist
-                paper.releases[dateString] = { hidden: false, pages: {} };
+                paper.releases[dateString] = { hidden: false, xmlDone: false, pages: {} };
 
                 // Initialize pages with default status and empty text
                 for (let page = 0; page < paper.defaultPages; page++) {
@@ -121,7 +154,7 @@ router.get("/:paperName/:date", async (req, res) => {
 
         // Initialize the release object for the specified date if it doesn't exist
         if (!releases[dateString]) {
-            releases[dateString] = { hidden: false, pages: {} };
+            releases[dateString] = { hidden: false, xmlDone: false, pages: {} };
 
             for (let page = 0; page < paper.defaultPages; page++) {
                 releases[dateString].pages[page] = { productionStatus: "notStarted", text: "" };
@@ -150,12 +183,17 @@ router.get("/:paperName/:date", async (req, res) => {
 
 // Get all data for single paper
 router.get("/:nameLowerCase", async (req, res) => {
-    let collection = await db.collection("papers");
-    let query = { nameLowerCase: req.params.nameLowerCase };
-    let result = await collection.findOne(query);
+    try {
+        const collection = await db.collection("papers");
+        const query = { nameLowerCase: req.params.nameLowerCase };
+        const result = await collection.findOne(query);
 
-    if (!result) res.status(404).send("Not Found");
-    else res.status(200).send(result);
+        if (!result) res.status(404).send("Not Found");
+        else res.status(200).json(result);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Internal Server Error");
+    }
 });
 
 function createLinkFriendlyName(name) {
@@ -175,11 +213,12 @@ router.post("/", async (req, res) => {
             pattern: req.body.pattern,
             info: req.body.info,
             deadline: req.body.deadline,
-            defaultPages: req.body.defaultPages
+            defaultPages: req.body.defaultPages,
+            releases: {} // Initialize releases as an empty object
         };
         let collection = await db.collection("papers");
         let result = await collection.insertOne(newPaper);
-        res.status(201).send(result);
+        res.status(201).json(result);
 
     } catch (err) {
         console.error(err);
@@ -203,7 +242,7 @@ router.patch("/:id", async (req, res) => {
         };
         let collection = await db.collection("papers");
         let result = await collection.updateOne(query, updates);
-        res.status(200).send(result);
+        res.status(200).json(result);
     } catch (err) {
         console.error(err);
         res.status(500).send("Error updating paper");
@@ -218,7 +257,7 @@ router.patch("/:paperName/:date", async (req, res) => {
         const paperName = req.params.paperName;
         const dateString = req.params.date;
         const date = new Date(dateString);
-        const { status, page, isHidden, text } = req.body;
+        const { status, page, isHidden, text, xmlDone } = req.body;
 
         // Check for valid date format
         if (isNaN(date.getTime())) {
@@ -237,12 +276,17 @@ router.patch("/:paperName/:date", async (req, res) => {
         // Ensure the releases object exists and has an entry for the date
         const releases = paper.releases || {};
         if (!releases[dateString]) {
-            releases[dateString] = { hidden: false, pages: {} };
+            releases[dateString] = { hidden: false, xmlDone: false, pages: {} };
         }
 
         // Update the hidden status if provided
         if (typeof isHidden === 'boolean') {
             releases[dateString].hidden = isHidden;
+        }
+
+        // Update xmlDone status if provided
+        if (typeof xmlDone === 'boolean') {
+            releases[dateString].xmlDone = xmlDone;
         }
 
         // Validate and update the page status and text if provided
@@ -252,8 +296,8 @@ router.patch("/:paperName/:date", async (req, res) => {
             }
 
             releases[dateString].pages[page] = {
-                productionStatus: status || releases[dateString].pages[page].productionStatus,
-                text: text || releases[dateString].pages[page].text
+                productionStatus: status || releases[dateString].pages[page]?.productionStatus || "notStarted",
+                text: text || releases[dateString].pages[page]?.text || ""
             };
         }
 
@@ -297,7 +341,7 @@ router.patch("/:paperName/:date/update", async (req, res) => {
         // Ensure the releases object exists and has an entry for the date
         const releases = paper.releases || {};
         if (!releases[dateString]) {
-            releases[dateString] = { hidden: false, pages: {} };
+            releases[dateString] = { hidden: false, xmlDone: false, pages: {} };
         }
 
         // Update all pages to the new status if provided
@@ -316,7 +360,7 @@ router.patch("/:paperName/:date/update", async (req, res) => {
             if (pageCount > currentPageCount) {
                 // Add new pages
                 for (let i = currentPageCount; i < pageCount; i++) {
-                    releases[dateString].pages[i] = { productionStatus: status || "notStarted", text:""};
+                    releases[dateString].pages[i] = { productionStatus: status || "notStarted", text: "" };
                 }
             } else if (pageCount < currentPageCount) {
                 // Remove excess pages
@@ -348,8 +392,8 @@ router.delete("/:id", async (req, res) => {
         const query = { _id: new ObjectId(req.params.id) };
 
         const collection = await db.collection("papers");
-        let result = await collection.deleteOne(query);
-        res.status(200).send(result);
+        const result = await collection.deleteOne(query);
+        res.status(200).json(result);
     } catch (err) {
         console.error(err);
         res.status(500).send(`Error deleting paper: ${err}`);
