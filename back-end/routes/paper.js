@@ -2,11 +2,7 @@ import express from "express";
 import db from "../db/connection.js";
 import { ObjectId } from "mongodb";
 
-
-
-
-const router = express.Router()
-
+const router = express.Router();
 
 /* 
 
@@ -24,16 +20,7 @@ Data should look like this:
         ]
     },
 
-
 */
-
-
-
-
-
-
-
-
 
 // Get all papers
 router.get("/", async (req, res) => {
@@ -41,11 +28,6 @@ router.get("/", async (req, res) => {
     let results = await collection.find({}).toArray();
     res.send(results).status(200);
 })
-
-
-
-
-
 
 router.get("/:date", async (req, res) => {
     try {
@@ -112,12 +94,6 @@ router.get("/:date", async (req, res) => {
     }
 });
 
-
-
-
-
-
-
 // Get paper at specific date.
 router.get("/:paperName/:date", async (req, res) => {
     try {
@@ -153,8 +129,6 @@ router.get("/:paperName/:date", async (req, res) => {
             }
         }
 
-
-
         filteredReleases[dateString] = releases[dateString];
 
         // Update the paper in the database
@@ -175,12 +149,6 @@ router.get("/:paperName/:date", async (req, res) => {
     }
 });
 
-
-
-
-
-
-
 // Get all data for single paper
 router.get("/:nameLowerCase", async (req, res) => {
     let collection = await db.collection("papers")
@@ -190,18 +158,6 @@ router.get("/:nameLowerCase", async (req, res) => {
     if (!result) res.send("Not Found").status(404)
     else res.send(result).status(200)
 })
-
-
-
-
-
-
-
-
-
-
-
-
 
 function createLinkFriendlyName(name) {
     return name.toLowerCase().replace(/\s+/g, '-');
@@ -227,21 +183,11 @@ router.post("/", async (req, res) => {
         let result = await collection.insertOne(newPaper)
         res.status(201).send(result)
 
-
-
     } catch (err) {
         console.error(err)
         res.status(500).send("Error adding paper")
     }
 })
-
-
-
-
-
-
-
-
 
 // Update Paper by Id
 router.patch("/:id", async (req, res) => {
@@ -266,18 +212,8 @@ router.patch("/:id", async (req, res) => {
     }
 })
 
-
-
-
-
-
-
-
-
-
-
 // Define the allowed status values
-const allowedStatuses = ["notStarted", "inProduction", "done"];
+const allowedStatuses = ["notStarted", "readyForProduction", "inProduction", "productionDone", "done"];
 
 router.patch("/:paperName/:date", async (req, res) => {
     try {
@@ -336,8 +272,6 @@ router.patch("/:paperName/:date", async (req, res) => {
         res.status(500).send("Internal Server Error");
     }
 });
-
-
 
 router.patch("/:paperName/:date/update", async (req, res) => {
     try {
@@ -407,10 +341,6 @@ router.patch("/:paperName/:date/update", async (req, res) => {
         res.status(500).send("Internal Server Error");
     }
 });
-
-
-
-
 
 // Delete Paper by Id
 router.delete("/:id", async (req, res) => {
