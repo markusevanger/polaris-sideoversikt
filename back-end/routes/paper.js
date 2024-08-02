@@ -278,7 +278,7 @@ router.patch("/:paperName/:date/update", async (req, res) => {
         const paperName = req.params.paperName;
         const dateString = req.params.date;
         const date = new Date(dateString);
-        const { status, pageCount, text } = req.body;
+        const { status, pageCount } = req.body;
 
         // Check for valid date format
         if (isNaN(date.getTime())) {
@@ -310,20 +310,13 @@ router.patch("/:paperName/:date/update", async (req, res) => {
             }
         }
 
-        // Update text for all pages if provided
-        if (text) {
-            for (let page in releases[dateString].pages) {
-                releases[dateString].pages[page].text = text;
-            }
-        }
-
         // Add or remove pages based on pageCount
         if (pageCount !== undefined) {
             const currentPageCount = Object.keys(releases[dateString].pages).length;
             if (pageCount > currentPageCount) {
                 // Add new pages
                 for (let i = currentPageCount; i < pageCount; i++) {
-                    releases[dateString].pages[i] = { productionStatus: status || "notStarted", text: text || "" };
+                    releases[dateString].pages[i] = { productionStatus: status || "notStarted", text:""};
                 }
             } else if (pageCount < currentPageCount) {
                 // Remove excess pages
