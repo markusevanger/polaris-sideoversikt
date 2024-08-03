@@ -249,7 +249,6 @@ router.patch("/:id", async (req, res) => {
     }
 });
 
-// Define the allowed status values
 const allowedStatuses = ["notStarted", "readyForProduction", "inProduction", "productionDone", "done"];
 
 router.patch("/:paperName/:date", async (req, res) => {
@@ -257,11 +256,11 @@ router.patch("/:paperName/:date", async (req, res) => {
         const paperName = req.params.paperName;
         const dateString = req.params.date;
         const date = new Date(dateString);
-        const { status, page, isHidden, text, xmlDone } = req.body;
+        const { status, page, isHidden, text, xmlDone, pageCount } = req.body;
 
         // Check for valid date format
         if (isNaN(date.getTime())) {
-            return res.status(400).send("Invalid date format " + dateString + " expected /YYYY-MM-DD");
+            return res.status(400).send("Invalid date format " + dateString + " expected YYYY-MM-DD");
         }
 
         const collection = db.collection("papers");
@@ -301,51 +300,8 @@ router.patch("/:paperName/:date", async (req, res) => {
             };
         }
 
-        // Update the paper in the database
-        await collection.updateOne(
-            { _id: new ObjectId(paper._id) },
-            { $set: { [`releases.${dateString}`]: releases[dateString] } }
-        );
-
-        // Return the updated paper info
-        const updatedPaper = await collection.findOne({ _id: new ObjectId(paper._id) });
-        res.status(200).json(updatedPaper);
-
-    } catch (err) {
-        console.error(err);
-        res.status(500).send("Internal Server Error");
-    }
-});
-
-router.patch("/:paperName/:date/update", async (req, res) => {
-    try {
-        const paperName = req.params.paperName;
-        const dateString = req.params.date;
-        const date = new Date(dateString);
-        const { status, pageCount } = req.body;
-
-        // Check for valid date format
-        if (isNaN(date.getTime())) {
-            return res.status(400).send("Invalid date format " + dateString + " expected YYYY-MM-DD");
-        }
-
-        const collection = db.collection("papers");
-
-        // Find the paper by name
-        const paper = await collection.findOne({ nameLowerCase: paperName.toLowerCase() });
-
-        if (!paper) {
-            return res.status(404).send("Paper not found");
-        }
-
-        // Ensure the releases object exists and has an entry for the date
-        const releases = paper.releases || {};
-        if (!releases[dateString]) {
-            releases[dateString] = { hidden: false, xmlDone: false, pages: {} };
-        }
-
         // Update all pages to the new status if provided
-        if (status) {
+        if (status && page === undefined) {
             if (!allowedStatuses.includes(status)) {
                 return res.status(400).send("Invalid status. Allowed values are: " + allowedStatuses.join(", "));
             }
@@ -385,6 +341,7 @@ router.patch("/:paperName/:date/update", async (req, res) => {
         res.status(500).send("Internal Server Error");
     }
 });
+
 
 // Delete Paper by Id
 router.delete("/:id", async (req, res) => {

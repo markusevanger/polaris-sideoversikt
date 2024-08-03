@@ -5,11 +5,14 @@ import AddPaperDialog from "./addPaperDialog";
 import { DatePicker } from "./DatePicker";
 import {
     amountOfPapers,
+    colorFromStatus,
+    countPagesWithStatus,
     getDateFormatted,
     getDayFromIndex,
     getDonePercentage,
     getMonthFromIndex,
     getPaperStatus,
+    statusEmoji,
 } from "./formattingFunctions";
 import {
     Card,
@@ -74,11 +77,6 @@ export default function Dashboard() {
         fetchPapers();
     }, [date]);
 
-    const statusOrder: { [key in PageStatus]: number } = {
-        notStarted: 0,
-        inProduction: 1,
-        done: 2,
-    };
 
     const handleSetHidden = async (
         isHidden: boolean,
@@ -168,22 +166,32 @@ export default function Dashboard() {
                                     notStarted={amountOfPapers("notStarted", papers, getDateFormatted(date!!))}
                                     inProduction={amountOfPapers("inProduction", papers, getDateFormatted(date!!))}
                                     done={amountOfPapers("done", papers, getDateFormatted(date!!))}
+
+                                    readyForProduction={0}
+                                    productionDone={0}
                                 />
                             </CardContent>
                         </Card>
-                        <div className="grid gap-3 row-start-1 grid-cols-3">
+                        <div className="grid gap-3 row-start-1 md:grid-cols-4 grid-cols-2">
                             <BigNumberCard
-                                number={amountOfPapers("done", papers, getDateFormatted(date))}
-                                title="done"
+                                number={amountOfPapers("notStarted", papers, getDateFormatted(date))}
+                                title="notStarted"
+                            ></BigNumberCard>
+
+                            <BigNumberCard
+                                number={amountOfPapers("readyForProduction", papers, getDateFormatted(date))}
+                                title="readyForProduction"
                             ></BigNumberCard>
                             <BigNumberCard
                                 number={amountOfPapers("inProduction", papers, getDateFormatted(date))}
                                 title="inProduction"
                             ></BigNumberCard>
+
                             <BigNumberCard
-                                number={amountOfPapers("notStarted", papers, getDateFormatted(date))}
-                                title="notStarted"
+                                number={amountOfPapers("done", papers, getDateFormatted(date))}
+                                title="done"
                             ></BigNumberCard>
+
                         </div>
                     </div>
                     <Card className="">
@@ -203,21 +211,7 @@ export default function Dashboard() {
                                 {papers.length === 0 ? (
                                     <p className="text-xs text-mono">Ingen aviser hentet</p>
                                 ) : (
-                                    papers.sort((a: Paper, b: Paper) => {
-                                        const currentDate = getDateFormatted(date);
-
-                                        // Get the status of each paper using the new format
-                                        const statusA = getPaperStatus(a, currentDate);
-                                        const statusB = getPaperStatus(b, currentDate);
-
-                                        // Handle cases where one or both statuses might be null
-                                        if (statusA === null && statusB === null) return 0;
-                                        if (statusA === null) return 1;
-                                        if (statusB === null) return -1;
-
-                                        // Compare statuses based on their defined order
-                                        return (statusOrder[statusA] ?? -1) - (statusOrder[statusB] ?? -1);
-                                    })
+                                    papers
                                         .map((paper: Paper, index: number) => {
                                             const release = paper.releases ? paper.releases[getDateFormatted(date)] : undefined;
 
@@ -226,20 +220,41 @@ export default function Dashboard() {
                                             }
 
                                             return (
-                                                <div key={index} className="flex justify-between mb-1 border items-center rounded-md p-2">
+                                                <Link key={index} className="flex justify-between mb-1 border items-center rounded-md p-2" to={`/${paper.nameLowerCase}/${getDateFormatted(date)}`}>
                                                     <div className="flex gap-2">
 
                                                         <Badge className="w-fit text-nowrap ">
                                                             {getDonePercentage(paper, dateStr!!).toFixed()} %
                                                         </Badge>
 
-                                                        <Link className="w-full justify-start flex items-center gap-2 text-nowrap overflow-hidden" to={`/${paper.nameLowerCase}/${getDateFormatted(date)}`}>
+                                                        <div className="w-full justify-start flex items-center gap-2 text-nowrap overflow-hidden" >
                                                             {paper.name}
-                                                        </Link>
+                                                        </div>
 
                                                     </div>
 
-                                                    <div className="flex gap-1">
+                                                    <div className="flex gap-1 items-center">
+
+                                                        {
+
+                                                            countPagesWithStatus(paper.releases[dateStr!!].pages, "readyForProduction") > 0 ?
+
+                                                                <TooltipProvider>
+                                                                    <Tooltip>
+                                                                        <TooltipTrigger>
+                                                                            {statusEmoji("readyForProduction")}
+                                                                        </TooltipTrigger>
+                                                                        <TooltipContent>
+                                                                            Noen sider er klare til produksjon
+                                                                        </TooltipContent>
+                                                                    </Tooltip>
+
+                                                                </TooltipProvider>
+
+
+                                                                : <></>
+                                                        }
+
                                                         <Button variant={"outline"} size={"icon"} onClick={() => { handleSetHidden(!release?.hidden, paper.nameLowerCase, getDateFormatted(date)) }}>
                                                             {release?.hidden ? <EyeOff /> : <Eye />}
                                                         </Button>
@@ -247,7 +262,7 @@ export default function Dashboard() {
                                                             <p className="font-mono text-xs text-muted-foreground">{paper.deadline}</p>
                                                         </Badge>
                                                     </div>
-                                                </div>
+                                                </Link>
                                             );
                                         })
                                 )}

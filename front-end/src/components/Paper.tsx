@@ -1,8 +1,15 @@
-export type PageStatus = "notStarted" | "inProduction" | "done";
+export type PageStatus = "notStarted" | "readyForProduction" | "inProduction" | "productionDone" | "done";
+
+
+
+export interface Page {
+    productionStatus: PageStatus,
+    text:string
+}
 
 export interface Release {
     hidden?: boolean;
-    pages: { [page: number]: PageStatus };
+    pages: { [page: number]: Page };
 }
 
 export interface Paper {

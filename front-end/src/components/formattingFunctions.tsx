@@ -1,10 +1,21 @@
-import { PageStatus, Paper } from "./Paper"
+import { Page, PageStatus, Paper } from "./Paper"
 
-export function statusEmoji(productionStatus: PageStatus) {
-    if (productionStatus == "notStarted") return <div className="rounded-full w-4 h-4 bg-[#ef4444]"></div>
-    else if (productionStatus == "inProduction") return <div className="rounded-full w-4 h-4 bg-[#fbbf24]"></div>
-    else if (productionStatus == "done") return <div className="rounded-full w-4 h-4 bg-[#84cc16]"></div>
+
+
+
+
+export function colorFromStatus(productionStatus: PageStatus): string {
+    if (productionStatus == "notStarted") return "#ef4444"
+    else if (productionStatus == "readyForProduction") return "#22d3ee"
+    else if (productionStatus == "inProduction") return "#fbbf24"
+    else if (productionStatus == "productionDone") return "#9333ea"
+    else if (productionStatus == "done") return "#84cc16"
     else return ""
+}
+
+export function statusEmoji(productionStatus: PageStatus | "blank") {
+    const color = productionStatus === "blank" ? "#FFFFFF" : colorFromStatus(productionStatus as PageStatus);
+    return color ? <div className="rounded-full w-4 h-4" style={{ backgroundColor: color }}></div> : "";
 }
 
 
@@ -61,15 +72,20 @@ export const getPaperStatus = (paper: Paper, dateFormatted: string): PageStatus 
     const pages = release.pages || {};
     const pageStatuses = Object.values(pages);
 
-    if (pageStatuses.every(pageStatus => pageStatus === "done")) {
+    if (pageStatuses.every(page => page.productionStatus === "done")) {
         return "done";
-    } else if (pageStatuses.some(pageStatus => pageStatus === "inProduction") || pageStatuses.some(pageStatus => pageStatus === "done")) {
-        return "inProduction";
-    } else if (pageStatuses.every(pageStatus => pageStatus === "notStarted")) {
+    } else if (pageStatuses.every(page => page.productionStatus === "notStarted")) {
         return "notStarted";
+    } else if (pageStatuses.every(page => page.productionStatus === "readyForProduction")) {
+        return "readyForProduction";
+    } else if (pageStatuses.every(page => page.productionStatus === "productionDone")) {
+        return "productionDone";
     }
 
-    return null;
+
+    else {
+        return "inProduction"
+    }
 };
 
 // Function to count the number of papers in each status
@@ -82,16 +98,14 @@ export const amountOfPapers = (status: PageStatus, paperData: Paper[], dateForma
 
 
 // Function to count the number of pages with a specific status in a single paper
-export const countPagesWithStatus = (paper: Paper, dateFormatted: string, status: PageStatus): number => {
-    const release = paper.releases[dateFormatted];
-    
-    if (!release || release.hidden) return 0; // No release or hidden, return 0
+export const countPagesWithStatus = (pages: { [page: number]: Page }, status: PageStatus): number => {
 
-    const pages = release.pages || {};
+    if (!pages) return 0
+
     const pageStatuses = Object.values(pages);
 
     // Count pages with the specified status
-    return pageStatuses.filter(pageStatus => pageStatus === status).length;
+    return pageStatuses.filter(pageStatus => pageStatus.productionStatus === status).length;
 };
 
 
@@ -99,17 +113,17 @@ export const countPagesWithStatus = (paper: Paper, dateFormatted: string, status
 // Function to calculate the percentage of "done" pages for a single paper
 export const getDonePercentage = (paper: Paper, dateFormatted: string): number => {
     const release = paper.releases[dateFormatted];
-    
+
     if (!release || release.hidden) return 0; // No release or hidden, return 0%
 
     const pages = release.pages || {};
     const totalPages = Object.keys(pages).length;
-    
+
     if (totalPages === 0) return 0; // No pages, return 0%
 
     // Count the number of "done" pages
-    const donePages = Object.values(pages).filter(pageStatus => pageStatus === "done").length;
-    
+    const donePages = Object.values(pages).filter(pageStatus => pageStatus.productionStatus === "done").length;
+
     // Calculate the percentage
     const donePercentage = (donePages / totalPages) * 100;
 
@@ -121,5 +135,7 @@ export function getStatusText(status: PageStatus): string {
     if (status === "notStarted") return "Ikke begynt";
     else if (status === "inProduction") return "I produksjon";
     else if (status === "done") return "Ferdig";
+    else if (status === "productionDone") return "Produksjon ferdig"
+    else if (status === "readyForProduction") return "Klar"
     else return status;
 }

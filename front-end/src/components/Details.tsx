@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Button, buttonVariants } from "./ui/button";
 import { cn } from "@/lib/utils";
-import { Check, ChevronLeft, Files, Info, PieChart } from "lucide-react";
-import { countPagesWithStatus, getMonthFromIndex, getPaperStatus, statusEmoji } from "./formattingFunctions";
+import { Check, ChevronLeft, Files, Info, OctagonX, PieChart, RefreshCcw, RefreshCw } from "lucide-react";
+import { countPagesWithStatus, getMonthFromIndex, getPaperStatus, getStatusText, statusEmoji } from "./formattingFunctions";
+import debounce from 'lodash.debounce';
+
 
 import {
     Card,
@@ -28,7 +30,6 @@ import { Label } from "./ui/label";
 import RadialChart from "./RadialChart";
 import AddPaperDialog from "./addPaperDialog";
 
-
 export default function Details() {
     const URL = "https://api.markusevanger.no/polaris/";
     const params = useParams();
@@ -48,7 +49,17 @@ export default function Details() {
     });
 
 
+    type TextValues = {
+        [key: string]: string;
+    };
+
+    const [textValues, setTextValues] = useState<TextValues>({});
+    const [syncedStatus, setSyncedStatus] = useState<"error" | "loading" | "done">("loading")
+
+
     const [pageAmount, setPageAmount] = useState(0)
+
+
 
     const dateObj = new Date(date!!);
 
@@ -59,8 +70,31 @@ export default function Details() {
         }));
     };
 
+    const handleTextChange = (pageNumber: number, newValue: string) => {
+        setTextValues((prevValues) => ({
+            ...prevValues,
+            [pageNumber]: newValue,
+        }));
+        setSyncedStatus("loading");
+        debouncedUpdatePageStatus(pageNumber, newValue);
+    };
 
-    async function getGeneralPaperInfo(){
+
+    const debouncedUpdatePageStatus = useRef(
+        debounce(async (pageNumber: number, newValue: string) => {
+            try {
+                await updatePageStatus(pageNumber, undefined, newValue);
+                setSyncedStatus('done');
+            } catch (error) {
+                setSyncedStatus('error');
+                console.error('Failed to update page:', error);
+            }
+        }, 500)
+    ).current;
+
+
+
+    async function getGeneralPaperInfo() {
         if (!name || !date) return;
 
         try {
@@ -75,6 +109,7 @@ export default function Details() {
 
             updatePaperState(paperData);
             setPageAmount(Object.keys(paperData.releases[date!!].pages).length)
+            setSyncedStatus("done")
             console.log(`Hentet avis: ${paperData.name}`);
         } catch (error) {
             console.error("Error fetching paper data:", error);
@@ -84,7 +119,7 @@ export default function Details() {
         getGeneralPaperInfo();
     }, [name, date]);
 
-    const updatePageStatus = async (pageNumber: number, newStatus: PageStatus, isHidden?: boolean) => {
+    const updatePageStatus = async (pageNumber: number, newStatus?: PageStatus, newText?: string) => {
         if (!date || !name) return;
 
         try {
@@ -95,30 +130,34 @@ export default function Details() {
                 },
                 body: JSON.stringify({
                     status: newStatus,
-                    page: pageNumber,
-                    isHidden: isHidden
+                    text: newText,
+                    page: pageNumber
                 }),
             });
 
             if (response.ok) {
                 const updatedPaper: Paper = await response.json();
                 setPaper(updatedPaper);
-                console.log(`Page status updated successfully for page ${pageNumber}`);
+                console.log(`Page status and text updated successfully for page ${pageNumber}`);
+                setSyncedStatus("done");
             } else {
                 const error = await response.text();
-                console.log(`Error updating page status: ${error}`);
+                console.log(`Error updating page status and text: ${error}`);
+                setSyncedStatus("error");
             }
         } catch (error) {
-            console.log(`Error updating page status: ${error}`);
+            console.log(`Error updating page status and text: ${error}`);
+            setSyncedStatus("error");
         }
     };
 
 
-    const updatePaperDetails = async (options: { status?: PageStatus; pageCount?: number }) => {
+
+    const updatePaperDetails = async (options: { status?: PageStatus; pageCount?: number; isHidden?: boolean; xmlDone?: boolean }) => {
         if (!date || !name) return;
 
         try {
-            const response = await fetch(`${URL}papers/${name}/${date}/update`, {
+            const response = await fetch(`${URL}papers/${name}/${date}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
@@ -136,14 +175,24 @@ export default function Details() {
                 if (options.pageCount !== undefined) {
                     console.log(`Page count updated to ${options.pageCount}`);
                 }
+                if (options.isHidden !== undefined) {
+                    console.log(`Hidden status updated to ${options.isHidden}`);
+                }
+                if (options.xmlDone !== undefined) {
+                    console.log(`XML done status updated to ${options.xmlDone}`);
+                }
+                setSyncedStatus("done");
             } else {
                 const error = await response.text();
                 console.log(`Error updating paper details: ${error}`);
+                setSyncedStatus("error");
             }
         } catch (error) {
             console.log(`Error updating paper details: ${error}`);
+            setSyncedStatus("error");
         }
     };
+
 
     return paper ? (
         <>
@@ -176,22 +225,36 @@ export default function Details() {
 
 
 
-                    <div className="grid grid-cols-8  h-full gap-4">
-                        <Card className="h-full p-3 lg:col-span-4 col-span-full row-span-2">
+                    <div className="">
+                        <Card className="">
                             <CardTitle className="flex gap-2"> <PieChart></PieChart> Status</CardTitle>
                             <CardContent className="h-full">
 
-                                <RadialChart
-                                    notStarted={countPagesWithStatus(paper, date!!, "notStarted")}
-                                    inProduction={countPagesWithStatus(paper, date!!, "inProduction")}
-                                    done={countPagesWithStatus(paper, date!!, "done")}
-                                >
-                                </RadialChart>
+
+
+                                {
+                                    date && paper.releases[date!!] ?
+                                        <RadialChart
+
+                                            notStarted={countPagesWithStatus(paper.releases[date!!].pages, "notStarted")}
+                                            inProduction={countPagesWithStatus(paper.releases[date!!].pages, "inProduction")}
+                                            done={countPagesWithStatus(paper.releases[date!!].pages, "done")}
+
+                                            readyForProduction={countPagesWithStatus(paper.releases[date!!].pages, "readyForProduction")}
+                                            productionDone={countPagesWithStatus(paper.releases[date!!].pages, "productionDone")}
+
+                                        >
+                                        </RadialChart> : <></>
+
+                                }
+
+
+
 
                             </CardContent>
                         </Card>
 
-                        <div className="h-full lg:col-span-4 row-span-2 grid grid-cols-2 grid-rows-3 gap-3 col-span-full">
+                        <div className="">
                             <Card className="p-3 row-span-2 col-span-2">
                                 <CardTitle className="flex gap-2">
                                     <Info ></Info>
@@ -211,9 +274,28 @@ export default function Details() {
                                         <SelectValue placeholder={statusEmoji(getPaperStatus(paper, date!!)!!)} />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="notStarted"><div className="flex gap-1 items-center">{statusEmoji("notStarted")} Ikke startet</div></SelectItem>
-                                        <SelectItem value="inProduction"><div className="flex gap-1 items-center">{statusEmoji("inProduction")} I Produksjon</div></SelectItem>
-                                        <SelectItem value="done"><div className="flex gap-1 items-center">{statusEmoji("done")} Ferdig</div> </SelectItem>
+                                        <SelectItem value="notStarted"><div className="flex gap-1 items-center">{statusEmoji("notStarted")} {getStatusText("notStarted")}</div></SelectItem>
+                                        <SelectItem value="readyForProduction"><div className="flex gap-1 items-center">{statusEmoji("readyForProduction")}  {getStatusText("readyForProduction")}</div></SelectItem>
+                                        <SelectItem value="inProduction"><div className="flex gap-1 items-center">{statusEmoji("inProduction")}  {getStatusText("inProduction")}</div></SelectItem>
+                                        <SelectItem value="productionDone"><div className="flex gap-1 items-center">{statusEmoji("productionDone")}  {getStatusText("productionDone")}</div></SelectItem>
+                                        <SelectItem value="done"><div className="flex gap-1 items-center">{statusEmoji("done")} {getStatusText("done")}</div> </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </Card>
+
+
+                            <Card className="p-3">
+                                <Label>XML Status:</Label>
+                                <Select
+                                    value={getPaperStatus(paper, date!!)!!}
+                                    onValueChange={(value: PageStatus) => updatePaperDetails({ status: value })}
+                                >
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder={statusEmoji(getPaperStatus(paper, date!!)!!)} />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="notStarted"><div className="flex gap-1 items-center">{statusEmoji("notStarted")} Ikke ferdig </div></SelectItem>
+                                        <SelectItem value="done"><div className="flex gap-1 items-center">{statusEmoji("done")} Ferdig </div></SelectItem>
                                     </SelectContent>
                                 </Select>
                             </Card>
@@ -238,37 +320,55 @@ export default function Details() {
 
 
 
-                        <Card className="col-span-8 h-fit mb-4">
-                            <CardHeader className="">
-                                <CardTitle className="flex gap-2"><Files />Sider</CardTitle>
+                        <Card className="">
+                            <CardHeader >
+                                <div className="flex justify-between">
+
+
+                                    <CardTitle className="flex gap-2"><Files />Sider</CardTitle>
+                                    <div className="">
+                                        {syncedStatus == "done" ? <Check /> : syncedStatus == "loading" ? <RefreshCw className="animate-spin" /> : <OctagonX />}
+                                    </div>
+                                </div>
                             </CardHeader>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 p-3">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 p-3 ">
                                 {paper.releases[date!!] ? (
-                                    Object.entries(paper.releases[date!!].pages).map(([pageNumber, status]) => (
+                                    Object.entries(paper.releases[date!!].pages).map(([pageNumber, page]) => (
                                         <div
                                             key={pageNumber}
-                                            className={`w-full border rounded-sm p-3 flex justify-between items-center`}
+                                            className={`w-full border rounded-sm p-3 gap-5 flex justify-between items-center `}
                                         >
                                             <span className="font-mono font-bold">{parseInt(pageNumber) + 1}</span>
+
+
+                                            <Input
+                                                className="w-auto max-w-[240px] border-0"
+                                                value={textValues[pageNumber] ?? page.text}
+                                                onChange={(e) => handleTextChange(parseInt(pageNumber), e.target.value)}
+                                            />
+
+
                                             <Select
-                                                value={status}
+                                                value={page.productionStatus}
                                                 onValueChange={(value: PageStatus) => updatePageStatus(parseInt(pageNumber), value)}
                                             >
-                                                <SelectTrigger className="w-fit">
-                                                    <SelectValue placeholder={statusEmoji(status)} />
+                                                <SelectTrigger className="">
+                                                    <SelectValue placeholder={statusEmoji(page.productionStatus)} />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="notStarted"><div className="flex gap-1 items-center">{statusEmoji("notStarted")} Ikke startet</div></SelectItem>
-                                                    <SelectItem value="inProduction"><div className="flex gap-1 items-center">{statusEmoji("inProduction")} I Produksjon</div></SelectItem>
-                                                    <SelectItem value="done"><div className="flex gap-1 items-center">{statusEmoji("done")} Ferdig</div> </SelectItem>
+                                                    <SelectItem value="notStarted"><div className="flex gap-1 items-center">{statusEmoji("notStarted")} {getStatusText("notStarted")}</div></SelectItem>
+                                                    <SelectItem value="readyForProduction"><div className="flex gap-1 items-center">{statusEmoji("readyForProduction")}  {getStatusText("readyForProduction")}</div></SelectItem>
+                                                    <SelectItem value="inProduction"><div className="flex gap-1 items-center">{statusEmoji("inProduction")}  {getStatusText("inProduction")}</div></SelectItem>
+                                                    <SelectItem value="productionDone"><div className="flex gap-1 items-center">{statusEmoji("productionDone")}  {getStatusText("productionDone")}</div></SelectItem>
+                                                    <SelectItem value="done"><div className="flex gap-1 items-center">{statusEmoji("done")} {getStatusText("done")}</div> </SelectItem>
                                                 </SelectContent>
                                             </Select>
                                         </div>
                                     ))
 
                                 ) : (
-                                    <div>No pages available for this date.</div>
+                                    <div>Ingen sider tilgjengelig</div>
                                 )}
                             </div>
                         </Card>
