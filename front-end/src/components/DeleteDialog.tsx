@@ -7,6 +7,7 @@ import { Button } from "./ui/button"
 import { Trash2 } from "lucide-react"
 import { Paper } from "./Paper"
 import { useNavigate } from "react-router-dom"
+import { useToast } from "./ui/use-toast"
 
 
 
@@ -14,7 +15,7 @@ import { useNavigate } from "react-router-dom"
 export function DeleteDialog(props: { paper: Paper }) {
 
     const navigate = useNavigate()
-
+    const { toast } = useToast()
 
     // This method will delete a record
     async function deleteRecord() {
@@ -26,6 +27,11 @@ export function DeleteDialog(props: { paper: Paper }) {
         });
         if (result.ok) {
             navigate("/")
+            toast({
+                title:`🗑️ Slettet ${paper.name} `,
+                description:`Avisen er nå permanent slettet fra databasen.`
+            })
+
         } else {
             console.log(result.statusText)
         }

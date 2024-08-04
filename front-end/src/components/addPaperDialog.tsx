@@ -17,8 +17,6 @@ import { useState, useEffect } from "react"
 import { Textarea } from "./ui/textarea"
 import { getDayFromIndex } from "./formattingFunctions"
 import { Paper } from "./Paper"
-import { TooltipContent, TooltipProvider, TooltipTrigger } from "@radix-ui/react-tooltip"
-import { Tooltip } from "./ui/tooltip"
 import { Switch } from "./ui/switch"
 import { useToast } from "./ui/use-toast"
 
@@ -117,18 +115,11 @@ export default function AddPaperDialog({ getPapers, paper }: AddPaperDialogProps
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => setOpen(open)}>
-            <TooltipProvider>
-                <Tooltip>
-                    <TooltipTrigger>
-                        <DialogTrigger className={buttonVariants({ variant: "outline", size: "icon" })}>
-                            {paper ? <Settings className="" /> : <CirclePlus className="" />}
-                        </DialogTrigger>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                        Legg til ny avis
-                    </TooltipContent>
-                </Tooltip>
-            </TooltipProvider>
+
+            <DialogTrigger className={buttonVariants({ variant: "outline", size: "icon" })}>
+                {paper ? <Settings className="" /> : <CirclePlus className="" />}
+            </DialogTrigger>
+
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>📰 {paper ? "Rediger Avis" : "Legg til Avis"}</DialogTitle>
