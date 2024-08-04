@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ScrollArea, ScrollBar } from "./ui/scroll-area";
 import AddPaperDialog from "./addPaperDialog";
@@ -22,7 +22,7 @@ import {
     CardTitle,
 } from "./ui/card";
 import RadialChart from "./RadialChart";
-import { PageStatus, Paper } from "./Paper";
+import { Paper } from "./Paper";
 import { BigNumberCard } from "./BigNumberCard";
 import {
     Newspaper,
@@ -47,16 +47,15 @@ import { Checkbox } from "./ui/checkbox";
 const URL = "https://api.markusevanger.no/polaris/papers";
 
 export default function Dashboard() {
-    const params = useParams();
-    const dateStr = params.date?.toString();
-    const initialDate = dateStr ? new Date(dateStr) : new Date(Date.now() + 24 * 60 * 60 * 1000); // Get tomorow if nothing is specified. 
+    const { date: dateStr } = useParams();
+    const initialDate = useMemo(() => dateStr ? new Date(dateStr) : new Date(Date.now() + 24 * 60 * 60 * 1000), [dateStr]); // Get tomorrow if nothing is specified.
 
     const [papers, setPapers] = useState<Paper[]>([]);
     const [date, setDate] = useState<Date>(initialDate);
     const [lastUpdated, setLastUpdated] = useState<Date | undefined>(undefined);
     const [showHiddenPapers, setShowHiddenPapers] = useState(false);
 
-    async function fetchPapers() {
+    const fetchPapers = useCallback(async () => {
         try {
             const response = await fetch(`${URL}/${getDateFormatted(date)}`);
             if (!response.ok) {
@@ -70,19 +69,14 @@ export default function Dashboard() {
         } catch (error) {
             console.error("Failed to fetch papers:", error);
         }
-    }
+    }, [date]);
 
     useEffect(() => {
         setPapers([]);
         fetchPapers();
-    }, [date]);
+    }, [date, fetchPapers]);
 
-
-    const handleSetHidden = async (
-        isHidden: boolean,
-        paperName: string,
-        dateStr: string
-    ) => {
+    const handleSetHidden = useCallback(async (isHidden: boolean, paperName: string, dateStr: string) => {
         try {
             const url = `${URL}/${paperName}/${dateStr}`;
             const response = await fetch(url, {
@@ -107,10 +101,10 @@ export default function Dashboard() {
         } catch (error) {
             console.error("Failed to update hidden status", error);
         }
-    };
+    }, []);
 
     return (
-        <div className="w-full  flex justify-center">
+        <div className="w-full flex justify-center">
             <div className="w-full mt-3 max-w-[1000px] flex flex-col p-5 gap-3 items-center">
                 <div className="w-full">
                     <div className="flex gap-3">
@@ -118,10 +112,20 @@ export default function Dashboard() {
                             <LayoutDashboard />
                             Sideoversikt
                         </h1>
-                        <Badge variant={"secondary"} className="text-sm font-mono flex gap-2 flex-wrap text-wrap">
-                            <Activity className="h-4 w-auto" />
-                            {lastUpdated ? `${String(lastUpdated.getHours()).padStart(2, '0')}:${String(lastUpdated.getMinutes()).padStart(2, '0')}:${String(lastUpdated.getSeconds()).padStart(2, '0')}` : "Laster..."}
-                        </Badge>
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipContent>
+                                    Sist hentet. Trykk for å hente på nytt
+                                </TooltipContent>
+                                <TooltipTrigger>
+                                    <Badge variant={"secondary"} onClick={() => fetchPapers()} className="text-sm font-mono flex gap-2 flex-wrap text-wrap cursor-pointer">
+                                        <Activity className="h-4 w-auto" />
+                                        {lastUpdated ? `${String(lastUpdated.getHours()).padStart(2, '0')}:${String(lastUpdated.getMinutes()).padStart(2, '0')}:${String(lastUpdated.getSeconds()).padStart(2, '0')}` : "Laster..."}
+                                    </Badge>
+                                </TooltipTrigger>
+                            </Tooltip>
+                        </TooltipProvider>
+
                     </div>
                 </div>
                 <div className="flex gap-1 justify-between w-full row-start-2">
@@ -163,27 +167,28 @@ export default function Dashboard() {
                             </CardHeader>
                             <CardContent className="flex-1">
                                 <RadialChart
-                                    notStarted={amountOfPapers("notStarted", papers, getDateFormatted(date!!))}
-                                    inProduction={amountOfPapers("inProduction", papers, getDateFormatted(date!!))}
-                                    done={amountOfPapers("done", papers, getDateFormatted(date!!))}
-
+                                    notStarted={amountOfPapers("notStarted", papers, getDateFormatted(date))}
+                                    inProduction={
+                                        amountOfPapers("inProduction", papers, getDateFormatted(date))
+                                        + amountOfPapers("readyForProduction", papers, getDateFormatted(date))
+                                        + amountOfPapers("productionDone", papers, getDateFormatted(date))
+                                    }
+                                    done={amountOfPapers("done", papers, getDateFormatted(date))}
                                     readyForProduction={0}
                                     productionDone={0}
                                 />
                             </CardContent>
                         </Card>
-                        <div className="grid gap-3 row-start-1 md:grid-cols-4 grid-cols-2">
+                        <div className="grid gap-3 row-start-1 grid-cols-3">
                             <BigNumberCard
                                 number={amountOfPapers("notStarted", papers, getDateFormatted(date))}
                                 title="notStarted"
                             ></BigNumberCard>
-
                             <BigNumberCard
-                                number={amountOfPapers("readyForProduction", papers, getDateFormatted(date))}
-                                title="readyForProduction"
-                            ></BigNumberCard>
-                            <BigNumberCard
-                                number={amountOfPapers("inProduction", papers, getDateFormatted(date))}
+                                number={
+                                    amountOfPapers("inProduction", papers, getDateFormatted(date))
+                                    + amountOfPapers("readyForProduction", papers, getDateFormatted(date))
+                                    + amountOfPapers("productionDone", papers, getDateFormatted(date))}
                                 title="inProduction"
                             ></BigNumberCard>
 
@@ -237,7 +242,7 @@ export default function Dashboard() {
 
                                                         {
 
-                                                            countPagesWithStatus(paper.releases[dateStr!!].pages, "readyForProduction") > 0 ?
+                                                            release && countPagesWithStatus(release!!.pages, "readyForProduction") > 0 ?
 
                                                                 <TooltipProvider>
                                                                     <Tooltip>
@@ -245,7 +250,26 @@ export default function Dashboard() {
                                                                             {statusEmoji("readyForProduction")}
                                                                         </TooltipTrigger>
                                                                         <TooltipContent>
-                                                                            Noen sider er klare til produksjon
+                                                                            {countPagesWithStatus(release!!.pages, "readyForProduction")} sider er klare til produksjon
+                                                                        </TooltipContent>
+                                                                    </Tooltip>
+
+                                                                </TooltipProvider>
+
+
+                                                                : <></>
+                                                        }
+                                                        {
+
+                                                            release && countPagesWithStatus(release!!.pages, "productionDone") > 0 ?
+
+                                                                <TooltipProvider>
+                                                                    <Tooltip>
+                                                                        <TooltipTrigger>
+                                                                            {statusEmoji("productionDone")}
+                                                                        </TooltipTrigger>
+                                                                        <TooltipContent>
+                                                                            {countPagesWithStatus(release!!.pages, "productionDone")} sider er klare til trykk
                                                                         </TooltipContent>
                                                                     </Tooltip>
 
@@ -267,7 +291,7 @@ export default function Dashboard() {
                                         })
                                 )}
                                 <div className="flex w-full flex-col items-center my-3 gap-2">
-                                    <p className="text-xs font-mono text-center">Antall aviser: {papers.length}</p>
+                                    <p className="text-xs font-mono text-center">Antall aviser i dag: {papers.length}</p>
                                     <AddPaperDialog getPapers={fetchPapers} />
                                 </div>
                                 <ScrollBar />

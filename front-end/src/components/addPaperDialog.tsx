@@ -17,6 +17,9 @@ import { useState, useEffect } from "react"
 import { Textarea } from "./ui/textarea"
 import { getDayFromIndex } from "./formattingFunctions"
 import { Paper } from "./Paper"
+import { TooltipContent, TooltipProvider, TooltipTrigger } from "@radix-ui/react-tooltip"
+import { Tooltip } from "./ui/tooltip"
+import { Switch } from "./ui/switch"
 
 interface AddPaperDialogProps {
     getPapers?: () => void;
@@ -30,6 +33,7 @@ export default function AddPaperDialog({ getPapers, paper }: AddPaperDialogProps
     const [isOpen, setOpen] = useState(false);
     const [defaultPages, setDefaultPages] = useState(paper ? paper.defaultPages : "24");
     const [weekdays, setWeekdays] = useState<number[]>(paper && paper.pattern ? paper.pattern : []);
+    const [useXML, setUseXML] = useState(false)
 
     useEffect(() => {
         if (paper) {
@@ -38,6 +42,7 @@ export default function AddPaperDialog({ getPapers, paper }: AddPaperDialogProps
             setDeadline(paper.deadline);
             setDefaultPages(paper.defaultPages);
             setWeekdays(paper.pattern);
+            setUseXML(paper.useXML)
         }
     }, [paper]);
 
@@ -51,11 +56,18 @@ export default function AddPaperDialog({ getPapers, paper }: AddPaperDialogProps
     const handleSubmit = async () => {
 
 
-        if (!(weekdays.length > 0)){
+        if (!(weekdays.length > 0)) {
             return
         }
 
-        const avis = { name: paperName, pattern: weekdays, info: info, deadline: deadline, defaultPages: defaultPages }; // Removed deadline from the request body
+        const avis = { 
+            name: paperName,
+            pattern: weekdays, 
+            info: info, 
+            deadline: deadline, 
+            defaultPages: defaultPages,
+            useXML:useXML
+        }; 
         const method = paper ? "PATCH" : "POST";
         const endpoint = paper ? `${URL}/${paper._id}` : URL;
 
@@ -84,9 +96,18 @@ export default function AddPaperDialog({ getPapers, paper }: AddPaperDialogProps
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => setOpen(open)}>
-            <DialogTrigger className={buttonVariants({ variant: "outline", size: "icon" })}>
-                {paper ? <Settings className="" /> : <CirclePlus className="" />}
-            </DialogTrigger>
+            <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger>
+                        <DialogTrigger className={buttonVariants({ variant: "outline", size: "icon" })}>
+                            {paper ? <Settings className="" /> : <CirclePlus className="" />}
+                        </DialogTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        Legg til ny avis
+                    </TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>📰 {paper ? "Rediger Avis" : "Legg til Avis"}</DialogTitle>
@@ -102,7 +123,7 @@ export default function AddPaperDialog({ getPapers, paper }: AddPaperDialogProps
                                 <div className="flex flex-col gap-1 border rounded-md p-2">
                                     <Label>Hvilke dager går avisen ut?</Label>
                                     {Array.from({ length: 7 }, (_, index) => (
-                                        <div key={index} className="w-full justify-start p-1">
+                                        <div key={index} className="w-full justify-start p-1 flex items-center gap-2">
                                             <Checkbox
                                                 id={index.toString()}
                                                 checked={weekdays.includes(index)}
@@ -116,6 +137,13 @@ export default function AddPaperDialog({ getPapers, paper }: AddPaperDialogProps
                                 <div className="border p-2 rounded-md">
                                     <Label>Hvor mange sider er avisen som regel?</Label>
                                     <Input value={defaultPages} onChange={(e) => setDefaultPages(e.target.value)} type="number" />
+                                </div>
+
+                                <div className="border p-2 rounded-md">
+                                    <div className="flex items-center space-x-2">
+                                        <Switch id="useXML" checked={useXML} onCheckedChange={(val) => setUseXML(val)}/>
+                                        <Label htmlFor="airplane-mode">Bruk XML Skjema</Label>
+                                    </div>
                                 </div>
                             </div>
 

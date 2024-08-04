@@ -1,16 +1,14 @@
-import { Page, PageStatus, Paper } from "./Paper"
-
-
-
-
+import { Page, PageStatus, Paper } from "./Paper";
 
 export function colorFromStatus(productionStatus: PageStatus): string {
-    if (productionStatus == "notStarted") return "#ef4444"
-    else if (productionStatus == "readyForProduction") return "#22d3ee"
-    else if (productionStatus == "inProduction") return "#fbbf24"
-    else if (productionStatus == "productionDone") return "#9333ea"
-    else if (productionStatus == "done") return "#84cc16"
-    else return ""
+    const colors = {
+        notStarted: "#ef4444",
+        readyForProduction: "#22d3ee",
+        inProduction: "#fbbf24",
+        productionDone: "#9333ea",
+        done: "#84cc16",
+    };
+    return colors[productionStatus] || "";
 }
 
 export function statusEmoji(productionStatus: PageStatus | "blank") {
@@ -18,39 +16,15 @@ export function statusEmoji(productionStatus: PageStatus | "blank") {
     return color ? <div className="rounded-full w-4 h-4" style={{ backgroundColor: color }}></div> : "";
 }
 
-
 export function getDayFromIndex(day: number) {
-    const days: Record<number, string> = {
-        0: "Mandag",
-        1: "Tirsdag",
-        2: "Onsdag",
-        3: "Torsdag",
-        4: "Fredag",
-        5: "Lørdag",
-        6: "Søndag"
-    }
-    return days[day]
+    const days = ["Mandag", "Tirsdag", "Onsdag", "Torsdag", "Fredag", "Lørdag", "Søndag"];
+    return days[day] || "";
 }
-
 
 export function getMonthFromIndex(month: number): string {
-    const months: Record<number, string> = {
-        0: "januar",
-        1: "februar",
-        2: "mars",
-        3: "april",
-        4: "mai",
-        5: "juni",
-        6: "juli",
-        7: "august",
-        8: "september",
-        9: "oktober",
-        10: "november",
-        11: "desember"
-    };
+    const months = ["januar", "februar", "mars", "april", "mai", "juni", "juli", "august", "september", "oktober", "november", "desember"];
     return months[month] || "Not a month";
 }
-
 
 export const getDateFormatted = (date: Date | undefined) => {
     if (date) {
@@ -62,15 +36,11 @@ export const getDateFormatted = (date: Date | undefined) => {
     return '';
 }
 
-
-
-// Function to determine the status of a single newspaper
 export const getPaperStatus = (paper: Paper, dateFormatted: string): PageStatus | null => {
     const release = paper.releases[dateFormatted];
     if (!release || release.hidden) return null;
 
-    const pages = release.pages || {};
-    const pageStatuses = Object.values(pages);
+    const pageStatuses = Object.values(release.pages || {});
 
     if (pageStatuses.every(page => page.productionStatus === "done")) {
         return "done";
@@ -80,37 +50,19 @@ export const getPaperStatus = (paper: Paper, dateFormatted: string): PageStatus 
         return "readyForProduction";
     } else if (pageStatuses.every(page => page.productionStatus === "productionDone")) {
         return "productionDone";
-    }
-
-
-    else {
-        return "inProduction"
+    } else {
+        return "inProduction";
     }
 };
 
-// Function to count the number of papers in each status
 export const amountOfPapers = (status: PageStatus, paperData: Paper[], dateFormatted: string): number => {
-    return paperData.filter((paper: Paper) => {
-        const paperStatus = getPaperStatus(paper, dateFormatted);
-        return paperStatus === status;
-    }).length;
+    return paperData.filter((paper: Paper) => getPaperStatus(paper, dateFormatted) === status).length;
 };
 
-
-// Function to count the number of pages with a specific status in a single paper
 export const countPagesWithStatus = (pages: { [page: number]: Page }, status: PageStatus): number => {
-
-    if (!pages) return 0
-
-    const pageStatuses = Object.values(pages);
-
-    // Count pages with the specified status
-    return pageStatuses.filter(pageStatus => pageStatus.productionStatus === status).length;
+    return Object.values(pages || {}).filter(page => page.productionStatus === status).length;
 };
 
-
-
-// Function to calculate the percentage of "done" pages for a single paper
 export const getDonePercentage = (paper: Paper, dateFormatted: string): number => {
     const release = paper.releases[dateFormatted];
 
@@ -125,17 +77,16 @@ export const getDonePercentage = (paper: Paper, dateFormatted: string): number =
     const donePages = Object.values(pages).filter(pageStatus => pageStatus.productionStatus === "done").length;
 
     // Calculate the percentage
-    const donePercentage = (donePages / totalPages) * 100;
-
-    return donePercentage;
+    return (donePages / totalPages) * 100;
 };
 
-
 export function getStatusText(status: PageStatus): string {
-    if (status === "notStarted") return "Ikke begynt";
-    else if (status === "inProduction") return "I produksjon";
-    else if (status === "done") return "Ferdig";
-    else if (status === "productionDone") return "Produksjon ferdig"
-    else if (status === "readyForProduction") return "Klar"
-    else return status;
+    const statusText = {
+        notStarted: "Ikke begynt",
+        inProduction: "I produksjon",
+        done: "Ferdig",
+        productionDone: "Produksjon ferdig",
+        readyForProduction: "Klar",
+    };
+    return statusText[status] || status;
 }

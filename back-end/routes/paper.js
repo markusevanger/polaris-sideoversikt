@@ -13,6 +13,7 @@ Data should look like this:
     info: "Some information about the paper",
     deadline: "12:00 PM",
     defaultPages: 4,
+    useXML: true
     releases: {
         "2024-07-23": {
             hidden: false,
@@ -203,17 +204,18 @@ function createLinkFriendlyName(name) {
 // Add new newspaper 
 router.post("/", async (req, res) => {
     try {
-        if (!req.body.name || !req.body.pattern || !req.body.deadline || !req.body.defaultPages) {
+        if (!req.body.name || !req.body.pattern || !req.body.deadline || !req.body.defaultPages || !req.body.useXML) {
             return res.status(400).send("Missing required fields");
         }
 
         let newPaper = {
-            name: req.body.name,
-            nameLowerCase: createLinkFriendlyName(req.body.name),
+            name: req.body.name.trim(),
+            nameLowerCase: createLinkFriendlyName(req.body.name.trim()),
             pattern: req.body.pattern,
             info: req.body.info,
             deadline: req.body.deadline,
             defaultPages: req.body.defaultPages,
+            useXML: req.body.useXML,
             releases: {} // Initialize releases as an empty object
         };
         let collection = await db.collection("papers");

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Button, buttonVariants } from "./ui/button";
 import { cn } from "@/lib/utils";
-import { Check, ChevronLeft, Files, Info, OctagonX, PieChart, RefreshCcw, RefreshCw } from "lucide-react";
+import { Check, ChevronLeft, CodeXml, Files, Info, OctagonX, PieChart, RefreshCcw, RefreshCw } from "lucide-react";
 import { countPagesWithStatus, getMonthFromIndex, getPaperStatus, getStatusText, statusEmoji } from "./formattingFunctions";
 import debounce from 'lodash.debounce';
 
@@ -29,6 +29,7 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import RadialChart from "./RadialChart";
 import AddPaperDialog from "./addPaperDialog";
+import { Skeleton } from "./ui/skeleton";
 
 export default function Details() {
     const URL = "https://api.markusevanger.no/polaris/";
@@ -45,7 +46,8 @@ export default function Details() {
         deadline: "",
         info: "",
         pattern: [],
-        defaultPages: ""
+        defaultPages: "",
+        useXML:false
     });
 
 
@@ -225,8 +227,10 @@ export default function Details() {
 
 
 
-                    <div className="">
-                        <Card className="">
+                    <div className="grid gap-3 md:grid-cols-2">
+
+
+                        <Card className="p-3">
                             <CardTitle className="flex gap-2"> <PieChart></PieChart> Status</CardTitle>
                             <CardContent className="h-full">
 
@@ -247,132 +251,138 @@ export default function Details() {
                                         </RadialChart> : <></>
 
                                 }
-
-
-
-
                             </CardContent>
                         </Card>
 
-                        <div className="">
-                            <Card className="p-3 row-span-2 col-span-2">
-                                <CardTitle className="flex gap-2">
-                                    <Info ></Info>
-                                    Info
-                                </CardTitle>
-                                <CardContent className="">{paper.info || "Ingen info oppgitt."}</CardContent>
-                            </Card>
-
-
-                            <Card className="p-3">
-                                <Label>Endre status for hele avis:</Label>
-                                <Select
-                                    value={getPaperStatus(paper, date!!)!!}
-                                    onValueChange={(value: PageStatus) => updatePaperDetails({ status: value })}
-                                >
-                                    <SelectTrigger className="w-full">
-                                        <SelectValue placeholder={statusEmoji(getPaperStatus(paper, date!!)!!)} />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="notStarted"><div className="flex gap-1 items-center">{statusEmoji("notStarted")} {getStatusText("notStarted")}</div></SelectItem>
-                                        <SelectItem value="readyForProduction"><div className="flex gap-1 items-center">{statusEmoji("readyForProduction")}  {getStatusText("readyForProduction")}</div></SelectItem>
-                                        <SelectItem value="inProduction"><div className="flex gap-1 items-center">{statusEmoji("inProduction")}  {getStatusText("inProduction")}</div></SelectItem>
-                                        <SelectItem value="productionDone"><div className="flex gap-1 items-center">{statusEmoji("productionDone")}  {getStatusText("productionDone")}</div></SelectItem>
-                                        <SelectItem value="done"><div className="flex gap-1 items-center">{statusEmoji("done")} {getStatusText("done")}</div> </SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </Card>
-
-
-                            <Card className="p-3">
-                                <Label>XML Status:</Label>
-                                <Select
-                                    value={getPaperStatus(paper, date!!)!!}
-                                    onValueChange={(value: PageStatus) => updatePaperDetails({ status: value })}
-                                >
-                                    <SelectTrigger className="w-full">
-                                        <SelectValue placeholder={statusEmoji(getPaperStatus(paper, date!!)!!)} />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="notStarted"><div className="flex gap-1 items-center">{statusEmoji("notStarted")} Ikke ferdig </div></SelectItem>
-                                        <SelectItem value="done"><div className="flex gap-1 items-center">{statusEmoji("done")} Ferdig </div></SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </Card>
-
-
-                            <Card className="p-3">
-                                <div className="flex flex-col">
-                                    <div>
-                                        <Label>Sidetall: </Label>
-                                        <div className="flex gap-1">
-                                            <Input type="number" value={pageAmount} onChange={(value) => setPageAmount(parseInt(value.target.value))}></Input>
-                                            <Button size={"icon"} variant={"secondary"} onClick={() => updatePaperDetails({ pageCount: pageAmount })}><Check></Check></Button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </Card>
-                        </div>
-
-
-
-
-
-
-
-                        <Card className="">
-                            <CardHeader >
-                                <div className="flex justify-between">
-
-
-                                    <CardTitle className="flex gap-2"><Files />Sider</CardTitle>
-                                    <div className="">
-                                        {syncedStatus == "done" ? <Check /> : syncedStatus == "loading" ? <RefreshCw className="animate-spin" /> : <OctagonX />}
-                                    </div>
-                                </div>
-                            </CardHeader>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 p-3 ">
-                                {paper.releases[date!!] ? (
-                                    Object.entries(paper.releases[date!!].pages).map(([pageNumber, page]) => (
-                                        <div
-                                            key={pageNumber}
-                                            className={`w-full border rounded-sm p-3 gap-5 flex justify-between items-center `}
-                                        >
-                                            <span className="font-mono font-bold">{parseInt(pageNumber) + 1}</span>
-
-
-                                            <Input
-                                                className="w-auto max-w-[240px] border-0"
-                                                value={textValues[pageNumber] ?? page.text}
-                                                onChange={(e) => handleTextChange(parseInt(pageNumber), e.target.value)}
-                                            />
-
-
-                                            <Select
-                                                value={page.productionStatus}
-                                                onValueChange={(value: PageStatus) => updatePageStatus(parseInt(pageNumber), value)}
-                                            >
-                                                <SelectTrigger className="">
-                                                    <SelectValue placeholder={statusEmoji(page.productionStatus)} />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="notStarted"><div className="flex gap-1 items-center">{statusEmoji("notStarted")} {getStatusText("notStarted")}</div></SelectItem>
-                                                    <SelectItem value="readyForProduction"><div className="flex gap-1 items-center">{statusEmoji("readyForProduction")}  {getStatusText("readyForProduction")}</div></SelectItem>
-                                                    <SelectItem value="inProduction"><div className="flex gap-1 items-center">{statusEmoji("inProduction")}  {getStatusText("inProduction")}</div></SelectItem>
-                                                    <SelectItem value="productionDone"><div className="flex gap-1 items-center">{statusEmoji("productionDone")}  {getStatusText("productionDone")}</div></SelectItem>
-                                                    <SelectItem value="done"><div className="flex gap-1 items-center">{statusEmoji("done")} {getStatusText("done")}</div> </SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                    ))
-
-                                ) : (
-                                    <div>Ingen sider tilgjengelig</div>
-                                )}
-                            </div>
+                        <Card className="p-3 ">
+                            <CardTitle className="flex gap-2">
+                                <Info ></Info>
+                                Info
+                            </CardTitle>
+                            <CardContent className="h-full text-wrap break-words">{paper.info || "Ingen info oppgitt."}</CardContent>
                         </Card>
                     </div>
+
+
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+
+                        <Card className="p-3">
+                            <Label className="flex gap-2 items-center mb-2"><CodeXml /> XML Status:</Label>
+                            {paper.releases[date!!] ? (
+                                <Select
+                                    value={paper.releases[date!!].xmlDone.toString()}
+                                    onValueChange={(value: string) => updatePaperDetails({ xmlDone: value === "true" })}
+                                >
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder={"false"} />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value={"false"}>
+                                            <div className="flex gap-1 items-center">{statusEmoji("notStarted")} Ikke ferdig </div>
+                                        </SelectItem>
+                                        <SelectItem value={"true"}>
+                                            <div className="flex gap-1 items-center">{statusEmoji("done")} Ferdig </div>
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            ) : (
+                                <Skeleton className="w-full h-full" />
+                            )}
+                        </Card>
+
+
+
+                        <Card className="p-3">
+                            <div className="flex flex-col">
+                                <div>
+                                    <Label>Sidetall: </Label>
+                                    <div className="flex gap-1">
+                                        <Input type="number" value={pageAmount} onChange={(value) => setPageAmount(parseInt(value.target.value))}></Input>
+                                        <Button size={"icon"} variant={"secondary"} onClick={() => updatePaperDetails({ pageCount: pageAmount })}><Check></Check></Button>
+                                    </div>
+                                </div>
+                            </div>
+                        </Card>
+
+
+
+
+
+
+                        <Card className=" p-3 md:col-span-full lg:col-span-1">
+                            <Label>Endre status for hele avis:</Label>
+                            <Select
+                                value={getPaperStatus(paper, date!!)!!}
+                                onValueChange={(value: PageStatus) => updatePaperDetails({ status: value })}
+                            >
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder={statusEmoji(getPaperStatus(paper, date!!)!!)} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="notStarted"><div className="flex gap-1 items-center">{statusEmoji("notStarted")} {getStatusText("notStarted")}</div></SelectItem>
+                                    <SelectItem value="readyForProduction"><div className="flex gap-1 items-center">{statusEmoji("readyForProduction")}  {getStatusText("readyForProduction")}</div></SelectItem>
+                                    <SelectItem value="inProduction"><div className="flex gap-1 items-center">{statusEmoji("inProduction")}  {getStatusText("inProduction")}</div></SelectItem>
+                                    <SelectItem value="productionDone"><div className="flex gap-1 items-center">{statusEmoji("productionDone")}  {getStatusText("productionDone")}</div></SelectItem>
+                                    <SelectItem value="done"><div className="flex gap-1 items-center">{statusEmoji("done")} {getStatusText("done")}</div> </SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </Card>
+
+
+                    </div>
+
+                    <Card className="">
+                        <CardHeader >
+                            <div className="flex justify-between">
+
+
+                                <CardTitle className="flex gap-2"><Files />Sider</CardTitle>
+                                <div className="">
+                                    {syncedStatus == "done" ? <Check /> : syncedStatus == "loading" ? <RefreshCw className="animate-spin" /> : <OctagonX />}
+                                </div>
+                            </div>
+                        </CardHeader>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 p-3 ">
+                            {paper.releases[date!!] ? (
+                                Object.entries(paper.releases[date!!].pages).map(([pageNumber, page]) => (
+                                    <div
+                                        key={pageNumber}
+                                        className={`w-full border rounded-sm p-3 gap-5 flex justify-between items-center `}
+                                    >
+                                        <span className="font-mono font-bold">{parseInt(pageNumber) + 1}</span>
+
+
+                                        <Input
+                                            className="w-auto max-w-[240px] border-0"
+                                            value={textValues[pageNumber] ?? page.text}
+                                            onChange={(e) => handleTextChange(parseInt(pageNumber), e.target.value)}
+                                        />
+
+
+                                        <Select
+                                            value={page.productionStatus}
+                                            onValueChange={(value: PageStatus) => updatePageStatus(parseInt(pageNumber), value)}
+                                        >
+                                            <SelectTrigger className="">
+                                                <SelectValue placeholder={statusEmoji(page.productionStatus)} />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="notStarted"><div className="flex gap-1 items-center">{statusEmoji("notStarted")} {getStatusText("notStarted")}</div></SelectItem>
+                                                <SelectItem value="readyForProduction"><div className="flex gap-1 items-center">{statusEmoji("readyForProduction")}  {getStatusText("readyForProduction")}</div></SelectItem>
+                                                <SelectItem value="inProduction"><div className="flex gap-1 items-center">{statusEmoji("inProduction")}  {getStatusText("inProduction")}</div></SelectItem>
+                                                <SelectItem value="productionDone"><div className="flex gap-1 items-center">{statusEmoji("productionDone")}  {getStatusText("productionDone")}</div></SelectItem>
+                                                <SelectItem value="done"><div className="flex gap-1 items-center">{statusEmoji("done")} {getStatusText("done")}</div> </SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                ))
+
+                            ) : (
+                                <div>Ingen sider tilgjengelig</div>
+                            )}
+                        </div>
+                    </Card>
                     <div className="w-full flex justify-center">
                         <Badge variant={"secondary"} className="w-fit">
                             Du har nådd bunnen :)

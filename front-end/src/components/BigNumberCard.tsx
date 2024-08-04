@@ -18,7 +18,7 @@ export function BigNumberCard(props: {number:number, title:PageStatus} ){
                 </CardTitle>
             </CardHeader>
             <CardContent>
-                <h3 className="text-center text-4xl font-bold"> {number}</h3>
+                <h3 className="text-center text-4xl font-bold text-nowrap"> {number}</h3>
             </CardContent>
         </Card>
     )

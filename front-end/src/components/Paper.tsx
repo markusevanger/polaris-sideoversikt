@@ -4,12 +4,14 @@ export type PageStatus = "notStarted" | "readyForProduction" | "inProduction" | 
 
 export interface Page {
     productionStatus: PageStatus,
-    text:string
+    text:string,
+
 }
 
 export interface Release {
     hidden?: boolean;
     pages: { [page: number]: Page };
+    xmlDone:boolean
 }
 
 export interface Paper {
@@ -18,7 +20,8 @@ export interface Paper {
     nameLowerCase: string;
     deadline: string;
     info: string;
-    pattern:number[]
+    pattern:number[];
+    useXML:boolean;
     releases: { [date: string]: Release };
     defaultPages:string
 }

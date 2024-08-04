@@ -27,16 +27,16 @@ export default function RadialChart(props: { done: number, inProduction: number,
     },
   }
   const chartData = [
-    { label: "Ferdig", value: props.done, fill: "var(--color-amountDone)" },
-    { label: "I Produksjon", value: props.inProduction, fill: "var(--color-amountInProduction)" },
-    { label: "Ikke startet", value: props.notStarted, fill: "var(--color-amountNotStarted)" },
-    { label: "Klar for produksjon", value: props.readyForProduction, fill: "var(--color-amountReady)" },
-    { label: "Produksjon ferdig", value: props.productionDone, fill: "var(--color-amountProductionDone)" },
+    { label: "Ferdig ", value: props.done, fill: "var(--color-amountDone)" },
+    { label: "I Produksjon ", value: props.inProduction, fill: "var(--color-amountInProduction)" },
+    { label: "Ikke startet ", value: props.notStarted, fill: "var(--color-amountNotStarted)" },
+    { label: "Klar for produksjon ", value: props.readyForProduction, fill: "var(--color-amountReady)" },
+    { label: "Produksjon ferdig ", value: props.productionDone, fill: "var(--color-amountProductionDone)" },
   ]
   return (
     <ChartContainer
       config={chartConfig}
-      className="mx-auto aspect-square max-h-[250px] pb-0 [&_.recharts-pie-label-text]:fill-foreground"
+      className="mx-auto max-h-[250px] pb-0 [&_.recharts-pie-label-text]:fill-foreground"
     >
 
       {
