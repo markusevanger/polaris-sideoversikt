@@ -239,7 +239,8 @@ router.patch("/:id", async (req, res) => {
                 pattern: req.body.pattern,
                 info: req.body.info,
                 defaultPages: req.body.defaultPages,
-                deadline: req.body.deadline
+                deadline: req.body.deadline,
+                useXML:req.body.useXML
             }
         };
         let collection = await db.collection("papers");
