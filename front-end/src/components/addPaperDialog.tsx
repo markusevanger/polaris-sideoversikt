@@ -20,6 +20,7 @@ import { Paper } from "./Paper"
 import { TooltipContent, TooltipProvider, TooltipTrigger } from "@radix-ui/react-tooltip"
 import { Tooltip } from "./ui/tooltip"
 import { Switch } from "./ui/switch"
+import { useToast } from "./ui/use-toast"
 
 interface AddPaperDialogProps {
     getPapers?: () => void;
@@ -34,6 +35,9 @@ export default function AddPaperDialog({ getPapers, paper }: AddPaperDialogProps
     const [defaultPages, setDefaultPages] = useState(paper ? paper.defaultPages : "24");
     const [weekdays, setWeekdays] = useState<number[]>(paper && paper.pattern ? paper.pattern : []);
     const [useXML, setUseXML] = useState(false)
+
+
+    const allowSend = () => paperName != "" && deadline != "" && defaultPages != "" && weekdays.length > 0
 
     useEffect(() => {
         if (paper) {
@@ -52,6 +56,8 @@ export default function AddPaperDialog({ getPapers, paper }: AddPaperDialogProps
         );
     };
 
+
+    const { toast } = useToast()
     const URL = "https://api.markusevanger.no/polaris/papers";
     const handleSubmit = async () => {
 
@@ -60,14 +66,14 @@ export default function AddPaperDialog({ getPapers, paper }: AddPaperDialogProps
             return
         }
 
-        const avis = { 
+        const avis = {
             name: paperName,
-            pattern: weekdays, 
-            info: info, 
-            deadline: deadline, 
+            pattern: weekdays,
+            info: info,
+            deadline: deadline,
             defaultPages: defaultPages,
-            useXML:useXML
-        }; 
+            useXML: useXML
+        };
         const method = paper ? "PATCH" : "POST";
         const endpoint = paper ? `${URL}/${paper._id}` : URL;
 
@@ -89,6 +95,21 @@ export default function AddPaperDialog({ getPapers, paper }: AddPaperDialogProps
                 getPapers();
             }
             setOpen(false);
+
+
+
+            if (method === "POST") {
+                toast({
+                    title: "✨ La til ny avis",
+                    description: `${avis.name} er nå lagt til!`,
+                })
+            } else {
+                toast({
+                    title: `💫 Oppdaterte ${avis.name}`,
+                    description: `${avis.name} ble oppdatert`,
+                })
+            }
+
         } catch (err) {
             console.log("A problem occurred: " + err);
         }
@@ -141,7 +162,7 @@ export default function AddPaperDialog({ getPapers, paper }: AddPaperDialogProps
 
                                 <div className="border p-2 rounded-md">
                                     <div className="flex items-center space-x-2">
-                                        <Switch id="useXML" checked={useXML} onCheckedChange={(val) => setUseXML(val)}/>
+                                        <Switch id="useXML" checked={useXML} onCheckedChange={(val) => setUseXML(val)} />
                                         <Label htmlFor="airplane-mode">Bruk XML Skjema</Label>
                                     </div>
                                 </div>
@@ -173,7 +194,7 @@ export default function AddPaperDialog({ getPapers, paper }: AddPaperDialogProps
                                     Lukk
                                 </Button>
                             </DialogClose>
-                            <Button onClick={handleSubmit}>{paper ? "Oppdater" : "Legg til"}</Button>
+                            <Button disabled={!allowSend()} onClick={handleSubmit}>{paper ? "Oppdater" : "Legg til"}</Button>
                         </div>
                     </DialogFooter>
                 </DialogHeader>

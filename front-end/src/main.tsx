@@ -7,6 +7,7 @@ import Dashboard from "./components/Dashboard.tsx"
 import Details from "./components/Details.tsx"
 import { siteNameStorageKey, ThemeProvider } from './components/theme-provider.tsx'
 import Feedback from './components/Feedback.tsx'
+import { Toaster } from './components/ui/toaster.tsx'
 
 
 const router = createBrowserRouter([
@@ -53,6 +54,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ThemeProvider defaultTheme="dark" storageKey={siteNameStorageKey}>
       <RouterProvider router={router} />
+      <Toaster/>
     </ThemeProvider>
 
   </React.StrictMode>,

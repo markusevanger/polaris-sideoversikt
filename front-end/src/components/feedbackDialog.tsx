@@ -13,6 +13,7 @@ import { Button, buttonVariants } from "./ui/button"
 import { MessageSquareHeart } from "lucide-react"
 import { useState } from "react"
 import { Textarea } from "./ui/textarea"
+import { useToast } from "./ui/use-toast"
 
 
 
@@ -21,6 +22,8 @@ export default function FeedbackDialog() {
 
     const [isOpen, setOpen] = useState(false)
     const [feedback, setFeedback] = useState("")
+
+    const { toast } = useToast()
 
     const handleSubmit = async () => {
         try {
@@ -39,8 +42,10 @@ export default function FeedbackDialog() {
             console.log(response.status + ": " + response.statusText)
             setOpen(false)
             setFeedback("")
-
-            // give feedback here
+            toast({
+                title: "❤️ Takk for tilbakemelding",
+                description: "Tilbakemelding er nå sendt!",
+            })
         }
         catch (err) {
             console.log("A problem occcured: " + err)

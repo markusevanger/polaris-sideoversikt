@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Button, buttonVariants } from "./ui/button";
 import { cn } from "@/lib/utils";
-import { Check, ChevronLeft, CodeXml, Files, Info, OctagonX, PieChart, RefreshCcw, RefreshCw } from "lucide-react";
+import { ArrowBigRight, Check, ChevronLeft, CodeXml, Files, Hash, Info, OctagonX, PieChart, RefreshCw } from "lucide-react";
 import { countPagesWithStatus, getMonthFromIndex, getPaperStatus, getStatusText, statusEmoji } from "./formattingFunctions";
 import debounce from 'lodash.debounce';
 
@@ -30,6 +30,7 @@ import { Label } from "./ui/label";
 import RadialChart from "./RadialChart";
 import AddPaperDialog from "./addPaperDialog";
 import { Skeleton } from "./ui/skeleton";
+import { useToast } from "./ui/use-toast";
 
 export default function Details() {
     const URL = "https://api.markusevanger.no/polaris/";
@@ -47,7 +48,7 @@ export default function Details() {
         info: "",
         pattern: [],
         defaultPages: "",
-        useXML:false
+        useXML: false
     });
 
 
@@ -61,6 +62,8 @@ export default function Details() {
 
     const [pageAmount, setPageAmount] = useState(0)
 
+
+    const { toast } = useToast()
 
 
     const dateObj = new Date(date!!);
@@ -173,9 +176,17 @@ export default function Details() {
 
                 if (options.status) {
                     console.log(`All pages status updated successfully to ${options.status}`);
+                    toast({
+                        title: "✅ Oppdaterte status for hele avisen",
+                        description: `Status er satt til "${getStatusText(options.status)}"`,
+                    })
                 }
                 if (options.pageCount !== undefined) {
                     console.log(`Page count updated to ${options.pageCount}`);
+                    toast({
+                        title: "✅ Oppdaterte sidetall",
+                        description: `${paper.name} for ${date} har nå ${options.pageCount} sider.`,
+                    })
                 }
                 if (options.isHidden !== undefined) {
                     console.log(`Hidden status updated to ${options.isHidden}`);
@@ -184,6 +195,7 @@ export default function Details() {
                     console.log(`XML done status updated to ${options.xmlDone}`);
                 }
                 setSyncedStatus("done");
+
             } else {
                 const error = await response.text();
                 console.log(`Error updating paper details: ${error}`);
@@ -234,8 +246,6 @@ export default function Details() {
                             <CardTitle className="flex gap-2"> <PieChart></PieChart> Status</CardTitle>
                             <CardContent className="h-full">
 
-
-
                                 {
                                     date && paper.releases[date!!] ?
                                         <RadialChart
@@ -264,52 +274,49 @@ export default function Details() {
                     </div>
 
 
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
-
-                        <Card className="p-3">
-                            <Label className="flex gap-2 items-center mb-2"><CodeXml /> XML Status:</Label>
-                            {paper.releases[date!!] ? (
-                                <Select
-                                    value={paper.releases[date!!].xmlDone.toString()}
-                                    onValueChange={(value: string) => updatePaperDetails({ xmlDone: value === "true" })}
-                                >
-                                    <SelectTrigger className="w-full">
-                                        <SelectValue placeholder={"false"} />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value={"false"}>
-                                            <div className="flex gap-1 items-center">{statusEmoji("notStarted")} Ikke ferdig </div>
-                                        </SelectItem>
-                                        <SelectItem value={"true"}>
-                                            <div className="flex gap-1 items-center">{statusEmoji("done")} Ferdig </div>
-                                        </SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            ) : (
-                                <Skeleton className="w-full h-full" />
-                            )}
-                        </Card>
+                    <div className="w-full flex flex-col md:flex-row gap-3 justify-between">
 
 
+                        {paper.useXML && (
+                            <Card className="p-3 w-full">
+                                <Label className="flex gap-2 items-center mb-2">
+                                    <CodeXml /> XML Status:
+                                </Label>
 
-                        <Card className="p-3">
-                            <div className="flex flex-col">
-                                <div>
-                                    <Label>Sidetall: </Label>
-                                    <div className="flex gap-1">
-                                        <Input type="number" value={pageAmount} onChange={(value) => setPageAmount(parseInt(value.target.value))}></Input>
-                                        <Button size={"icon"} variant={"secondary"} onClick={() => updatePaperDetails({ pageCount: pageAmount })}><Check></Check></Button>
-                                    </div>
-                                </div>
-                            </div>
-                        </Card>
+                                {
+                                    paper.releases[date!!] ?
+                                        <Select
+                                            value={paper.releases[date!!].xmlDone.toString()}
+                                            onValueChange={(value) => updatePaperDetails({ xmlDone: value === "true" })}
+                                        >
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder={"false"} />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value={"false"}>
+                                                    <div className="flex gap-1 items-center">
+                                                        {statusEmoji("notStarted")} Ikke ferdig
+                                                    </div>
+                                                </SelectItem>
+                                                <SelectItem value={"true"}>
+                                                    <div className="flex gap-1 items-center">
+                                                        {statusEmoji("done")} Ferdig
+                                                    </div>
+                                                </SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        :
+                                        <Skeleton className="w-full h-full" />
+                                }
 
+
+                            </Card>
+                        )}
 
 
 
 
-
-                        <Card className=" p-3 md:col-span-full lg:col-span-1">
+                        <Card className=" p-3 w-full">
                             <Label>Endre status for hele avis:</Label>
                             <Select
                                 value={getPaperStatus(paper, date!!)!!}
@@ -328,13 +335,29 @@ export default function Details() {
                             </Select>
                         </Card>
 
+                        <Card className="p-3 w-full">
+                            <div className="flex flex-col">
+                                <div>
+                                    <Label className="flex gap-2 items-center mb-2">
+                                        <Hash /> Antall sider for utgave
+                                    </Label>                                   
+                                     <div className="flex gap-1">
+                                        <Input type="number" value={pageAmount} onChange={(value) => setPageAmount(parseInt(value.target.value))}></Input>
+                                        <Button size={"icon"} variant={"default"} onClick={() => updatePaperDetails({ pageCount: pageAmount })}><ArrowBigRight /></Button>
+                                    </div>
+                                </div>
+                            </div>
+                        </Card>
+
 
                     </div>
+
+
+
 
                     <Card className="">
                         <CardHeader >
                             <div className="flex justify-between">
-
 
                                 <CardTitle className="flex gap-2"><Files />Sider</CardTitle>
                                 <div className="">

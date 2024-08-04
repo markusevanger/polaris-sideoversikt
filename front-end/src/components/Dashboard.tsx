@@ -1,17 +1,15 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { ScrollArea, ScrollBar } from "./ui/scroll-area";
 import AddPaperDialog from "./addPaperDialog";
 import { DatePicker } from "./DatePicker";
 import {
     amountOfPapers,
-    colorFromStatus,
     countPagesWithStatus,
     getDateFormatted,
     getDayFromIndex,
     getDonePercentage,
     getMonthFromIndex,
-    getPaperStatus,
     statusEmoji,
 } from "./formattingFunctions";
 import {
@@ -54,6 +52,7 @@ export default function Dashboard() {
     const [date, setDate] = useState<Date>(initialDate);
     const [lastUpdated, setLastUpdated] = useState<Date | undefined>(undefined);
     const [showHiddenPapers, setShowHiddenPapers] = useState(false);
+    const navigate = useNavigate()
 
     const fetchPapers = useCallback(async () => {
         try {
@@ -102,6 +101,15 @@ export default function Dashboard() {
             console.error("Failed to update hidden status", error);
         }
     }, []);
+
+
+
+    const handleClickOnPaper = (e:React.MouseEvent<HTMLDivElement, MouseEvent>, path:string) => {
+        // Only navigate if the click is on the parent element
+        if (e.target === e.currentTarget) {
+            navigate(path);
+        }
+    };
 
     return (
         <div className="w-full flex justify-center">
@@ -225,14 +233,14 @@ export default function Dashboard() {
                                             }
 
                                             return (
-                                                <Link key={index} className="flex justify-between mb-1 border items-center rounded-md p-2" to={`/${paper.nameLowerCase}/${getDateFormatted(date)}`}>
+                                                <div key={index} onClick={(e) => handleClickOnPaper(e, `/${paper.nameLowerCase}/${getDateFormatted(date)}`)} className="flex justify-between mb-1 border items-center rounded-md p-2 cursor-pointer">
                                                     <div className="flex gap-2">
 
                                                         <Badge className="w-fit text-nowrap ">
                                                             {getDonePercentage(paper, dateStr!!).toFixed()} %
                                                         </Badge>
 
-                                                        <div className="w-full justify-start flex items-center gap-2 text-nowrap overflow-hidden" >
+                                                        <div onClick={(e) => handleClickOnPaper(e, `/${paper.nameLowerCase}/${getDateFormatted(date)}`)} className="w-full justify-start flex items-center gap-2 text-nowrap overflow-hidden" >
                                                             {paper.name}
                                                         </div>
 
@@ -279,14 +287,17 @@ export default function Dashboard() {
                                                                 : <></>
                                                         }
 
-                                                        <Button variant={"outline"} size={"icon"} onClick={() => { handleSetHidden(!release?.hidden, paper.nameLowerCase, getDateFormatted(date)) }}>
+                                                        <Button variant={"outline"} size={"icon"} onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleSetHidden(!release?.hidden, paper.nameLowerCase, getDateFormatted(date));
+                                                        }}>
                                                             {release?.hidden ? <EyeOff /> : <Eye />}
                                                         </Button>
                                                         <Badge variant={"secondary"} className="">
                                                             <p className="font-mono text-xs text-muted-foreground">{paper.deadline}</p>
                                                         </Badge>
                                                     </div>
-                                                </Link>
+                                                </div>
                                             );
                                         })
                                 )}
