@@ -22,7 +22,7 @@ Nettsiden er optimalisert for både mobil, tablet og desktop.
 
 ## Skjermbilder:
 <img width="1679" alt="image" src="https://github.com/user-attachments/assets/65cc47ec-3cfd-4be9-86ef-92522b8d827a">
-<img width="1679" alt="image" src="https://github.com/user-attachments/assets/e5c78f81-99fa-4ef4-8e7e-25c41feff651">
+<img width="1679" alt="image" src="https://github.com/user-attachments/assets/47de6fdb-ee2f-494b-8a17-ea77927d68d1">
 <img width="1679" alt="image" src="https://github.com/user-attachments/assets/5095e7c0-570f-4f4f-b868-1899d45c89f7">
 
 
